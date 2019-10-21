@@ -5,4 +5,14 @@
 	display: flex;
 	position: absolute;
 	transition: all 0s ease-in-out;
+	& .canon {
+		position: absolute;
+		top: 40%;
+		left: 100%;
+		background: red;
+		height: 1rem;
+		width: 2rem;
+	}
+	& .lazer {
+	}
 }

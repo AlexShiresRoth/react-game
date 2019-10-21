@@ -1,15 +1,21 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import Canon from './Canon';
+import Lazer from './Lazer';
 import playerStyles from './playerstyles/PlayerOne.module.scss';
+
 export default class PlayerOne extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
 			startingPositionY: null,
 			startingPositionX: null,
+			lazerPosition: null,
+			lazerStyles: {},
+			lazers: this.lazers,
 		};
-
 		this.movePlayer = this.movePlayer.bind(this);
+		this.shootLazer = this.shootLazer.bind(this);
 	}
 	coords = {
 		top: 40,
@@ -19,39 +25,67 @@ export default class PlayerOne extends React.Component {
 		height: 5,
 		width: 5,
 	};
+	lazers = [];
+	shootLazer = e => {
+		if (e) {
+			if (e.keyCode === 32) {
+				const lazerStyles = {
+					position: 'absolute',
+					height: '0.5rem',
+					width: '2rem',
+					top: '40%',
+					left: '100%',
+					background: 'orange',
+					display: 'block',
+				};
+				this.lazers.push('lazer');
+				this.setState({ lazerStyles });
+				let count = 0;
+				if (this.lazers.length > 4) {
+					this.lazers.pop();
+				}
+				setInterval(() => {
+					if (count <= 101) {
+						count += 1;
+						this.setState({ lazerPosition: count });
+						if (count > 99) {
+							lazerStyles.display = 'none';
+						}
+					}
+					return clearInterval();
+				}, 1);
+			}
+		}
+	};
 
 	movePlayer = e => {
-		const moveUp = () => {
-			const newPosition = this.coords.top > 0 ? (this.coords.top -= 2) : (this.coords.top -= 0);
-			return newPosition;
-		};
-		const moveLeft = () => {
-			const newPosition = this.coords.left > 0 ? (this.coords.left -= 2) : (this.coords.left -= 0);
-			return newPosition;
-		};
-		const moveRight = () => {
-			const newPosition =
-				this.coords.left < 98 - this.dimensions.width ? (this.coords.left += 2) : (this.coords.left += 0);
-			return newPosition;
-		};
-		const moveDown = () => {
-			const newPosition =
-				this.coords.top < 95 - this.dimensions.height ? (this.coords.top += 2) : (this.coords.top += 0);
-			return newPosition;
-		};
 		if (e) {
 			switch (e.which) {
 				case 87:
-					this.setState({ startingPositionY: moveUp() });
+					this.setState({
+						startingPositionY: this.coords.top > 0 ? (this.coords.top -= 2) : (this.coords.top -= 0),
+					});
 					break;
 				case 65:
-					this.setState({ startingPositionX: moveLeft() });
+					this.setState({
+						startingPositionX: this.coords.left > 0 ? (this.coords.left -= 2) : (this.coords.left -= 0),
+					});
 					break;
 				case 68:
-					this.setState({ startingPositionX: moveRight() });
+					this.setState({
+						startingPositionX:
+							this.coords.left < 98 - this.dimensions.width
+								? (this.coords.left += 2)
+								: (this.coords.left += 0),
+					});
 					break;
 				case 83:
-					this.setState({ startingPositionY: moveDown() });
+					this.setState({
+						startingPositionY:
+							this.coords.top < 95 - this.dimensions.height
+								? (this.coords.top += 2)
+								: (this.coords.top += 0),
+					});
 					break;
 				default:
 					break;
@@ -60,7 +94,12 @@ export default class PlayerOne extends React.Component {
 	};
 	componentDidMount() {
 		document.addEventListener('keydown', this.movePlayer.bind(this));
-		this.setState({ startingPositionY: this.coords.top, startingPositionX: this.coords.left });
+		document.addEventListener('keydown', this.shootLazer.bind(this));
+		this.setState({
+			startingPositionY: this.coords.top,
+			startingPositionX: this.coords.left,
+			lazerPosition: null,
+		});
 	}
 
 	render() {
@@ -74,7 +113,15 @@ export default class PlayerOne extends React.Component {
 				}}
 				className={playerStyles.player__one}
 				onKeyDown={e => this.movePlayer(e)}
-			></div>
+			>
+				<Canon
+					playerStyles={playerStyles.canon}
+					shootLazer={e => this.shootLazer(e)}
+					lazers={this.state.lazers}
+					lazerStyles={this.state.lazerStyles}
+					lazerPosition={this.state.lazerPosition}
+				></Canon>
+			</div>
 		);
 	}
 }
