@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Canon from './Canon';
-import Lazer from './Lazer';
 import playerStyles from './playerstyles/PlayerOne.module.scss';
 
 export default class PlayerOne extends React.Component {
@@ -16,6 +15,7 @@ export default class PlayerOne extends React.Component {
 		};
 		this.movePlayer = this.movePlayer.bind(this);
 		this.shootLazer = this.shootLazer.bind(this);
+		this.lazerRef = React.createRef();
 	}
 	coords = {
 		top: 40,
@@ -25,7 +25,9 @@ export default class PlayerOne extends React.Component {
 		height: 5,
 		width: 5,
 	};
+
 	lazers = [];
+
 	shootLazer = e => {
 		if (e) {
 			if (e.keyCode === 32) {
@@ -120,6 +122,8 @@ export default class PlayerOne extends React.Component {
 					lazers={this.state.lazers}
 					lazerStyles={this.state.lazerStyles}
 					lazerPosition={this.state.lazerPosition}
+					lazerRef={this.lazerRef}
+					enemyDimensions={this.props.enemyDimensions}
 				></Canon>
 			</div>
 		);
