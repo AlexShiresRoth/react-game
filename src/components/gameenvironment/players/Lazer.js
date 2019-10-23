@@ -10,16 +10,6 @@ const Lazer = ({ lazerStyles, lazerPosition, lazer, lazerRef, enemyDimensions })
 			bottom: lazerDimensions.bottom,
 			right: lazerDimensions.right,
 		};
-		let enemyCoords = {
-			top: enemyDimensions.top,
-			left: enemyDimensions.left,
-			right: enemyDimensions.right,
-			bottom: enemyDimensions.bottom,
-		};
-		for (let coord in lazerCoords) {
-			console.log(Math.floor(lazerCoords[coord]) === Math.floor(enemyCoords[coord]) ? 'hit' : 'no');
-			return Math.floor(lazerCoords[coord]) === Math.floor(enemyCoords[coord]) ? 'hit' : 'no';
-		}
 	}
 	return (
 		<div

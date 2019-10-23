@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
+import { getEnemyCoordinates } from '../../../actions/enemy';
+import { connect } from 'react-redux';
 
 const Enemy = ({ enemyRef, enemyStyle, getDimensions }) => {
 	const [enemyCoords, setCoords] = useState({
@@ -28,4 +30,11 @@ const Enemy = ({ enemyRef, enemyStyle, getDimensions }) => {
 
 Enemy.propTypes = {};
 
-export default Enemy;
+const mapStateToProps = state => ({
+	coords: state.coords,
+});
+
+export default connect(
+	mapStateToProps,
+	{ getEnemyCoordinates }
+)(Enemy);
