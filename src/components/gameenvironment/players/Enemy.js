@@ -1,17 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { getEnemyCoordinates } from '../../../actions/enemy';
-import { connect } from 'react-redux';
 
 const Enemy = ({ enemyRef, enemyStyle, getDimensions }) => {
-	const [enemyCoords, setCoords] = useState({
-		top: '',
-		left: '',
-		bottom: '',
-		right: '',
-	});
-
-	setTimeout(() => {
+	useEffect(() => {
 		if (enemyRef.current) {
 			const enemy = enemyRef.current.getBoundingClientRect();
 			const enemyArea = {
@@ -21,20 +12,17 @@ const Enemy = ({ enemyRef, enemyStyle, getDimensions }) => {
 				bottom: enemy.bottom,
 			};
 
-			setCoords(enemyArea);
+			return getDimensions(enemyArea);
 		}
-	}, 200);
+	}, []);
 
-	return <div className="enemy" style={enemyStyle} onClick={() => getDimensions(enemyCoords)} ref={enemyRef}></div>;
+	return <div className="enemy" style={enemyStyle} ref={enemyRef}></div>;
 };
 
-Enemy.propTypes = {};
+Enemy.propTypes = {
+	enemyRef: PropTypes.object.isRequired,
+	enemyStyle: PropTypes.object.isRequired,
+	getDimensions: PropTypes.func.isRequired,
+};
 
-const mapStateToProps = state => ({
-	coords: state.coords,
-});
-
-export default connect(
-	mapStateToProps,
-	{ getEnemyCoordinates }
-)(Enemy);
+export default Enemy;

@@ -2,11 +2,14 @@ import React from 'react';
 import PlayerOne from './players/PlayerOne';
 import layoutStyles from './gamestyles/GameEnvironment.module.scss';
 import Enemy from './players/Enemy';
+import { connect } from 'react-redux';
+import { getEnemyCoordinates } from '../../actions/enemy';
+
 class GameEnvironment extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			enemyDimensions: null,
+			enemyDimensions: {},
 		};
 		this.enemyRef = React.createRef();
 		this.getDimensions = this.getDimensions.bind(this);
@@ -14,8 +17,15 @@ class GameEnvironment extends React.Component {
 
 	getDimensions = dimensions => {
 		this.setState({ enemyDimensions: dimensions });
+		console.log(dimensions);
 	};
-	componentDidMount() {}
+
+	componentDidUpdate(prevProps, prevState) {
+		if (this.state.enemyDimensions !== prevState.enemyDimensions) {
+			this.props.getEnemyCoordinates(this.state.enemyDimensions);
+		}
+	}
+
 	render() {
 		const style = {
 			height: '10rem',
@@ -39,5 +49,10 @@ class GameEnvironment extends React.Component {
 		);
 	}
 }
-
-export default GameEnvironment;
+const mapStateToProps = state => {
+	return { coords: state };
+};
+export default connect(
+	mapStateToProps,
+	{ getEnemyCoordinates }
+)(GameEnvironment);
