@@ -6,10 +6,10 @@ const Enemy = ({ enemyRef, enemyStyle, getDimensions }) => {
 		if (enemyRef.current) {
 			const enemy = enemyRef.current.getBoundingClientRect();
 			const enemyArea = {
-				top: enemy.top,
-				left: enemy.left,
-				right: enemy.right,
-				bottom: enemy.bottom,
+				top: Math.floor(enemy.top),
+				left: Math.floor(enemy.left),
+				right: Math.floor(enemy.right),
+				bottom: Math.floor(enemy.bottom),
 			};
 
 			return getDimensions(enemyArea);

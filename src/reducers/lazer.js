@@ -1,16 +1,15 @@
-import { ENEMY_COORDINATES } from '../actions/types';
+import { LAZER_COORDINATES } from '../actions/types';
 
 const initialState = {
-	enemyCoords: {},
+	lazerCoords: {},
 };
-
 export default (state = initialState, action) => {
 	const { type, payload } = action;
 	switch (type) {
-		case ENEMY_COORDINATES:
+		case LAZER_COORDINATES:
 			return {
 				...state,
-				enemyCoords: payload,
+				lazerCoords: payload,
 			};
 		default:
 			return state;

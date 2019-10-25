@@ -17,7 +17,6 @@ class GameEnvironment extends React.Component {
 
 	getDimensions = dimensions => {
 		this.setState({ enemyDimensions: dimensions });
-		console.log(dimensions);
 	};
 
 	componentDidUpdate(prevProps, prevState) {
@@ -50,7 +49,7 @@ class GameEnvironment extends React.Component {
 	}
 }
 const mapStateToProps = state => {
-	return { coords: state };
+	return { enemyCoords: state.enemy, lazerCoords: state.lazer };
 };
 export default connect(
 	mapStateToProps,

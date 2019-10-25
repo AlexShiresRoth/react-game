@@ -2,14 +2,18 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Canon from './Canon';
 import playerStyles from './playerstyles/PlayerOne.module.scss';
+import { getLazerCoordinates } from '../../../actions/lazer';
+import { connect } from 'react-redux';
 
-export default class PlayerOne extends React.Component {
+class PlayerOne extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			startingPositionY: null,
 			startingPositionX: null,
-			lazerPosition: null,
+			startingPositionY: null,
+			playerCoords: this.coords,
+			lazerPosition: {},
+			lazerCoords: {},
 			lazerStyles: {},
 			lazers: this.lazers,
 		};
@@ -28,6 +32,12 @@ export default class PlayerOne extends React.Component {
 
 	lazers = [];
 
+	getLazerCoords = lazerCoords => {
+		console.log(lazerCoords);
+		this.setState({
+			lazerCoords,
+		});
+	};
 	shootLazer = e => {
 		if (e) {
 			if (e.keyCode === 32) {
@@ -49,7 +59,8 @@ export default class PlayerOne extends React.Component {
 				setInterval(() => {
 					if (count <= 101) {
 						count += 1;
-						this.setState({ lazerPosition: count });
+						this.setState({ lazerPosition: { left: count } });
+
 						if (count > 99) {
 							lazerStyles.display = 'none';
 						}
@@ -94,14 +105,17 @@ export default class PlayerOne extends React.Component {
 			}
 		}
 	};
+
 	componentDidMount() {
 		document.addEventListener('keydown', this.movePlayer.bind(this));
 		document.addEventListener('keydown', this.shootLazer.bind(this));
-		this.setState({
-			startingPositionY: this.coords.top,
-			startingPositionX: this.coords.left,
-			lazerPosition: null,
-		});
+		this.setState({ startingPositionX: this.coords.left, startingPositionY: this.coords.top });
+	}
+
+	componentDidUpdate(prevProps, prevState) {
+		if (this.state.lazerCoords !== prevState.lazerCoords) {
+			this.props.getLazerCoordinates(this.state.lazerCoords);
+		}
 	}
 
 	render() {
@@ -122,12 +136,26 @@ export default class PlayerOne extends React.Component {
 					lazers={this.state.lazers}
 					lazerStyles={this.state.lazerStyles}
 					lazerPosition={this.state.lazerPosition}
+					getLazerCoords={this.getLazerCoords}
 					lazerRef={this.lazerRef}
-					enemyDimensions={this.props.enemyDimensions}
 				></Canon>
 			</div>
 		);
 	}
 }
 
-PlayerOne.propTypes = {};
+PlayerOne.propTypes = {
+	enemyDimensions: PropTypes.object.isRequired,
+};
+
+const mapStateToProps = state => {
+	return {
+		enemyCoords: state.enemy,
+		lazerCoords: state.lazer,
+	};
+};
+
+export default connect(
+	mapStateToProps,
+	{ getLazerCoordinates }
+)(PlayerOne);
