@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import Lazer from './Lazer';
 const Canon = ({ playerStyles, shootLazer, lazers, lazerPosition, lazerStyles, lazerRef, getLazerCoords }) => {
 	return (
-		<div className={playerStyles} onKeyDown={shootLazer}>
+		<div className={playerStyles} onKeyDown={e => shootLazer(e)}>
 			{lazers.map((lazer, i) => {
 				return (
 					<Lazer

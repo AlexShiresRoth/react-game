@@ -1,19 +1,37 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 
-const Lazer = ({ lazerStyles, lazerPosition, lazer, lazerRef, getLazerCoords }) => {
+const Lazer = ({ lazerPosition, lazer, lazerRef, getLazerCoords }) => {
+	const lazerStyles = {
+		position: 'absolute',
+		height: '0.5rem',
+		width: '2rem',
+		top: '40%',
+		left: '100%',
+		background: 'orange',
+		display: 'none',
+	};
+	const [count, setCount] = useState(0);
+
 	useEffect(() => {
-		let count = 0;
-		setInterval(() => {
-			if (count < 100) {
-				getLazerCoords(lazerRef.current.getBoundingClientRect());
-				return clearInterval();
-			}
-			count += 1;
-		}, 200);
-		return getLazerCoords(lazerRef.current.getBoundingClientRect());
+		if (lazerRef.current) {
+			let interval = setInterval(() => {
+				setCount(count => count + 1);
+			}, 200);
+
+			setTimeout(() => {
+				clearInterval(interval);
+			}, 900);
+
+			return () => clearInterval(interval);
+		}
 	}, []);
 
+	if (lazerRef.current) {
+		if (count < 10) {
+			getLazerCoords(lazerRef.current.getBoundingClientRect());
+		}
+	}
 	return (
 		<div
 			ref={lazerRef}
@@ -21,13 +39,13 @@ const Lazer = ({ lazerStyles, lazerPosition, lazer, lazerRef, getLazerCoords }) 
 			style={{
 				...lazerStyles,
 				left: `${lazerPosition.left > 100 ? (lazerPosition.left = 0) : lazerPosition.left}vw`,
+				display: `${lazerPosition.left < 100 && lazerPosition.left > 0 ? 'block' : 'none'}`,
 			}}
 		></div>
 	);
 };
 
 Lazer.propTypes = {
-	lazerStyles: PropTypes.object.isRequired,
 	lazerPosition: PropTypes.object.isRequired,
 };
 

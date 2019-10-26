@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Canon from './Canon';
 import playerStyles from './playerstyles/PlayerOne.module.scss';
-import { getLazerCoordinates } from '../../../actions/lazer';
+import { getEnemyHit } from '../../../actions/enemyHit';
 import { connect } from 'react-redux';
 
 class PlayerOne extends React.Component {
@@ -13,8 +13,7 @@ class PlayerOne extends React.Component {
 			startingPositionY: null,
 			playerCoords: this.coords,
 			lazerPosition: {},
-			lazerCoords: {},
-			lazerStyles: {},
+			enemyHit: false,
 			lazers: this.lazers,
 		};
 		this.movePlayer = this.movePlayer.bind(this);
@@ -31,42 +30,40 @@ class PlayerOne extends React.Component {
 	};
 
 	lazers = [];
-
+	hits = [];
 	getLazerCoords = lazerCoords => {
-		console.log(lazerCoords);
-		this.setState({
-			lazerCoords,
-		});
+		const enemy = this.props.enemyCoords.enemyCoords;
+		const lazer = lazerCoords;
+
+		if (
+			lazer.x < enemy.x + lazer.width &&
+			lazer.x + lazer.width > enemy.x &&
+			lazer.y < enemy.y + enemy.height &&
+			lazer.y + lazer.height > enemy.y
+		) {
+			this.hits.unshift('hit');
+		} else {
+			this.hits.splice(0, this.hits.length);
+		}
+	};
+	registerHit = () => {
+		return this.hits.length > 1 ? this.setState({ enemyHit: true }) : this.setState({ enemyHit: false });
 	};
 	shootLazer = e => {
 		if (e) {
 			if (e.keyCode === 32) {
-				const lazerStyles = {
-					position: 'absolute',
-					height: '0.5rem',
-					width: '2rem',
-					top: '40%',
-					left: '100%',
-					background: 'orange',
-					display: 'block',
-				};
 				this.lazers.push('lazer');
-				this.setState({ lazerStyles });
 				let count = 0;
 				if (this.lazers.length > 4) {
 					this.lazers.pop();
 				}
 				setInterval(() => {
-					if (count <= 101) {
-						count += 1;
+					if (count <= 100) {
+						count += 2;
 						this.setState({ lazerPosition: { left: count } });
-
-						if (count > 99) {
-							lazerStyles.display = 'none';
-						}
 					}
-					return clearInterval();
-				}, 1);
+					return () => clearInterval();
+				}, 10);
 			}
 		}
 	};
@@ -111,10 +108,16 @@ class PlayerOne extends React.Component {
 		document.addEventListener('keydown', this.shootLazer.bind(this));
 		this.setState({ startingPositionX: this.coords.left, startingPositionY: this.coords.top });
 	}
-
+	componentWillUnmount() {
+		document.removeEventListener('keydown', this.movePlayer.bind(this));
+		document.removeEventListener('keydown', this.shootLazer.bind(this));
+	}
 	componentDidUpdate(prevProps, prevState) {
-		if (this.state.lazerCoords !== prevState.lazerCoords) {
-			this.props.getLazerCoordinates(this.state.lazerCoords);
+		if (this.state.lazerPosition !== prevState.lazerPosition) {
+			this.registerHit();
+		}
+		if (this.state.enemyHit !== prevState.enemyHit) {
+			this.props.getEnemyHit(this.state.enemyHit);
 		}
 	}
 
@@ -132,9 +135,8 @@ class PlayerOne extends React.Component {
 			>
 				<Canon
 					playerStyles={playerStyles.canon}
-					shootLazer={e => this.shootLazer(e)}
+					shootLazer={this.shootLazer}
 					lazers={this.state.lazers}
-					lazerStyles={this.state.lazerStyles}
 					lazerPosition={this.state.lazerPosition}
 					getLazerCoords={this.getLazerCoords}
 					lazerRef={this.lazerRef}
@@ -151,11 +153,11 @@ PlayerOne.propTypes = {
 const mapStateToProps = state => {
 	return {
 		enemyCoords: state.enemy,
-		lazerCoords: state.lazer,
+		enemyHit: state.enemyHit,
 	};
 };
 
 export default connect(
 	mapStateToProps,
-	{ getLazerCoordinates }
+	{ getEnemyHit }
 )(PlayerOne);
