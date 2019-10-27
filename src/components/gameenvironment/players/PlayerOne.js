@@ -31,20 +31,24 @@ class PlayerOne extends React.Component {
 
 	lazers = [];
 	hits = [];
+	//fix -- enemyCoords seem to be where the last render occurred
 	getLazerCoords = lazerCoords => {
-		const enemy = this.props.enemyCoords.enemyCoords;
+		const enemies = this.props.enemyCoords.enemyCoords;
 		const lazer = lazerCoords;
 
-		if (
-			lazer.x < enemy.x + lazer.width &&
-			lazer.x + lazer.width > enemy.x &&
-			lazer.y < enemy.y + enemy.height &&
-			lazer.y + lazer.height > enemy.y
-		) {
-			this.hits.unshift('hit');
-		} else {
-			this.hits.splice(0, this.hits.length);
-		}
+		return enemies.map((enemy, i) => {
+			if (
+				lazer.x < enemy.x + enemy.width &&
+				lazer.x + lazer.width > enemy.x &&
+				lazer.y < enemy.y + enemy.height &&
+				lazer.y + lazer.height > enemy.y
+			) {
+				console.log('hit');
+				return this.hits.unshift('hit');
+			} else {
+				return this.hits.splice(0, this.hits.length);
+			}
+		});
 	};
 	registerHit = () => {
 		return this.hits.length > 1 ? this.setState({ enemyHit: true }) : this.setState({ enemyHit: false });
@@ -147,7 +151,7 @@ class PlayerOne extends React.Component {
 }
 
 PlayerOne.propTypes = {
-	enemyDimensions: PropTypes.object.isRequired,
+	enemyDimensions: PropTypes.array.isRequired,
 };
 
 const mapStateToProps = state => {

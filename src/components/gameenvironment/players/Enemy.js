@@ -10,7 +10,7 @@ const Enemy = ({ enemyRef, getDimensions, enemyHit, title }) => {
 		position: 'absolute',
 		background: 'red',
 		display: 'block',
-		top: `${randomSpawnY >= 0 && randomSpawnY <= 90 ? randomSpawnY : 0}vh`,
+		top: `${randomSpawnY >= 0 && randomSpawnY <= 85 ? randomSpawnY : 0}vh`,
 		left: `${randomSpawnX >= 40 && randomSpawnX <= 95 ? randomSpawnX : 40}vw`,
 	};
 	useEffect(() => {
@@ -19,6 +19,7 @@ const Enemy = ({ enemyRef, getDimensions, enemyHit, title }) => {
 
 			return getDimensions(enemy);
 		}
+		return;
 	}, []);
 
 	return (

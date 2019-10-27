@@ -1,7 +1,7 @@
 import React from 'react';
 import PlayerOne from './players/PlayerOne';
 import layoutStyles from './gamestyles/GameEnvironment.module.scss';
-import Enemy from './players/Enemy';
+import LevelOne from './levels/LevelOne';
 import { connect } from 'react-redux';
 import { getEnemyCoordinates } from '../../actions/enemy';
 
@@ -17,56 +17,42 @@ class GameEnvironment extends React.Component {
 		this.enemyRef3 = React.createRef();
 		this.getDimensions = this.getDimensions.bind(this);
 	}
-
-	setEnemyAmt = () => {
-		return this.setState({
-			enemies: [
-				...this.state.enemies,
-				{ enemy: 'enemyOne', ref: this.enemyRef1, coords: {} },
-				{ enemy: 'enemyTwo', ref: this.enemyRef2, coords: {} },
-				{ enemy: 'enemyThree', ref: this.enemyRef3, coords: {} },
-			],
-		});
+	coordinates = [];
+	setEnemyAmt = enemies => {
+		return this.setState({ enemies: enemies });
 	};
 
 	//set enemy amount in redux
 	getDimensions = dimensions => {
-		this.state.enemies.map(enemy => {
-			return this.setState({ enemyDimensions: dimensions });
-		});
+		this.coordinates.push(dimensions);
+
+		return this.setState({ enemyDimensions: [...this.coordinates] });
 	};
-	componentDidMount() {
-		this.setEnemyAmt();
-		console.log(this.state.enemyDimensions);
-	}
 
 	componentDidUpdate(prevProps, prevState) {
 		if (this.state.enemyDimensions !== prevState.enemyDimensions) {
-			this.state.enemies.map(enemy => {
-				this.props.getEnemyCoordinates(this.state.enemyDimensions);
-			});
-			console.log(this.state.enemies);
+			this.props.getEnemyCoordinates(this.state.enemyDimensions);
 		}
 	}
 
 	render() {
-		const enemies = [...this.state.enemies];
-
+		const levelOneEnemies = [
+			{ enemy: 'enemyOne', ref: this.enemyRef1, coords: this.props.enemyCoords.enemyCoords[0] },
+			{ enemy: 'enemyTwo', ref: this.enemyRef2, coords: this.props.enemyCoords.enemyCoords[1] },
+			{ enemy: 'enemyThree', ref: this.enemyRef3, coords: this.props.enemyCoords.enemyCoords[2] },
+		];
+		console.log(levelOneEnemies);
 		return (
 			<div className={layoutStyles.game__area}>
 				<PlayerOne enemyDimensions={this.state.enemyDimensions} />
-				{enemies.map((enemy, i) => {
-					return (
-						<Enemy
-							enemyRef={enemy.ref}
-							enemyDimensions={this.state.enemyDimensions}
-							getDimensions={this.getDimensions}
-							enemyHit={this.props.enemyHit}
-							key={i}
-							title={enemy.enemy}
-						/>
-					);
-				})}
+				<LevelOne
+					enemies={this.state.enemies}
+					levelOneEnemies={levelOneEnemies}
+					enemyHit={this.props.enemyHit}
+					getDimensions={this.getDimensions}
+					enemyDimensions={this.state.enemyDimensions}
+					setEnemyAmt={this.setEnemyAmt}
+				/>
 			</div>
 		);
 	}
