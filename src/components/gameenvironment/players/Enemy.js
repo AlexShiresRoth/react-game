@@ -1,17 +1,15 @@
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 
-const Enemy = ({ enemyRef, getDimensions, enemyHit, title }) => {
-	const randomSpawnX = Math.floor(Math.random() * 100);
-	const randomSpawnY = Math.floor(Math.random() * 100);
+const Enemy = ({ enemyRef, getDimensions, enemyHit, title, randomSpawnX, randomSpawnY }) => {
 	const enemyStyle = {
 		height: '10rem',
 		width: '10rem',
 		position: 'absolute',
 		background: 'red',
 		display: 'block',
-		top: `${randomSpawnY >= 0 && randomSpawnY <= 85 ? randomSpawnY : 0}vh`,
-		left: `${randomSpawnX >= 40 && randomSpawnX <= 95 ? randomSpawnX : 40}vw`,
+		top: `${randomSpawnY}`,
+		left: `${randomSpawnX}`,
 	};
 	useEffect(() => {
 		if (enemyRef.current) {

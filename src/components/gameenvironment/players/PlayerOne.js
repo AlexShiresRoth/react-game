@@ -11,48 +11,54 @@ class PlayerOne extends React.Component {
 		this.state = {
 			startingPositionX: null,
 			startingPositionY: null,
+			rotation: 0,
 			playerCoords: this.coords,
 			lazerPosition: {},
 			enemyHit: false,
 			lazers: this.lazers,
+			hits: this.hits,
+			character: null,
 		};
 		this.movePlayer = this.movePlayer.bind(this);
 		this.shootLazer = this.shootLazer.bind(this);
+		this.playerOneRef = React.createRef();
 		this.lazerRef = React.createRef();
 	}
 	coords = {
-		top: 40,
-		left: 10,
+		top: 400,
+		left: 100,
 	};
 	dimensions = {
-		height: 5,
-		width: 5,
+		height: 4,
+		width: 7,
 	};
 
 	lazers = [];
 	hits = [];
+
 	//fix -- enemyCoords seem to be where the last render occurred
 	getLazerCoords = lazerCoords => {
 		const enemies = this.props.enemyCoords.enemyCoords;
 		const lazer = lazerCoords;
 
-		return enemies.map((enemy, i) => {
+		enemies.map((enemy, i) => {
 			if (
 				lazer.x < enemy.x + enemy.width &&
 				lazer.x + lazer.width > enemy.x &&
 				lazer.y < enemy.y + enemy.height &&
 				lazer.y + lazer.height > enemy.y
 			) {
-				console.log('hit');
 				return this.hits.unshift('hit');
 			} else {
-				return this.hits.splice(0, this.hits.length);
+				return this.hits;
 			}
 		});
 	};
+
 	registerHit = () => {
-		return this.hits.length > 1 ? this.setState({ enemyHit: true }) : this.setState({ enemyHit: false });
+		return this.state.hits.length > 0 ? this.setState({ enemyHit: true }) : this.setState({ enemyHit: false });
 	};
+
 	shootLazer = e => {
 		if (e) {
 			if (e.keyCode === 32) {
@@ -61,7 +67,7 @@ class PlayerOne extends React.Component {
 				if (this.lazers.length > 4) {
 					this.lazers.pop();
 				}
-				setInterval(() => {
+				setInterval(async () => {
 					if (count <= 100) {
 						count += 2;
 						this.setState({ lazerPosition: { left: count } });
@@ -71,38 +77,69 @@ class PlayerOne extends React.Component {
 			}
 		}
 	};
+	rotatePlayer = e => {
+		if (this.playerOneRef.current) {
+			const player = this.playerOneRef.current.getBoundingClientRect();
 
+			let playerCenter = [player.left + player.width / 2, player.top + player.height / 2];
+
+			let angle = Math.atan2(e.offsetX - playerCenter[0], -(e.offsetY - playerCenter[1])) * (180 / Math.PI);
+
+			if (e.which === 39) {
+				this.setState({ rotation: this.state.rotation + 10 });
+			}
+			if (e.which === 37) {
+				this.setState({ rotation: this.state.rotation - 10 });
+			}
+		}
+	};
+	//break the rotation to separate function with mouse move
 	movePlayer = e => {
+		e.preventDefault();
 		if (e) {
-			switch (e.which) {
-				case 87:
-					this.setState({
-						startingPositionY: this.coords.top > 0 ? (this.coords.top -= 2) : (this.coords.top -= 0),
-					});
-					break;
-				case 65:
-					this.setState({
-						startingPositionX: this.coords.left > 0 ? (this.coords.left -= 2) : (this.coords.left -= 0),
-					});
-					break;
-				case 68:
-					this.setState({
-						startingPositionX:
-							this.coords.left < 98 - this.dimensions.width
-								? (this.coords.left += 2)
-								: (this.coords.left += 0),
-					});
-					break;
-				case 83:
-					this.setState({
-						startingPositionY:
-							this.coords.top < 95 - this.dimensions.height
-								? (this.coords.top += 2)
-								: (this.coords.top += 0),
-					});
-					break;
-				default:
-					break;
+			if (this.props.canvasRef.current && this.playerOneRef.current) {
+				const canvas = this.props.canvasRef.current.getBoundingClientRect();
+				const player = this.playerOneRef.current.getBoundingClientRect();
+				switch (e.which) {
+					case 87:
+					case 38:
+						this.setState({
+							startingPositionY:
+								this.coords.top > 0 ? (this.coords.top -= player.height) : (this.coords.top -= 0),
+						});
+						break;
+					case 65:
+						this.setState({
+							startingPositionX:
+								this.coords.left > 0 ? (this.coords.left -= player.width) : (this.coords.left -= 0),
+						});
+						break;
+					case 68:
+						this.setState({
+							startingPositionX:
+								this.coords.left < canvas.width - player.width
+									? (this.coords.left += player.width)
+									: (this.coords.left += 0),
+						});
+						break;
+					case 83:
+					case 40:
+						this.setState({
+							startingPositionY:
+								this.coords.top < canvas.height - player.height
+									? (this.coords.top += player.height)
+									: (this.coords.top += 0),
+						});
+						break;
+					case 37:
+						this.rotatePlayer(e);
+						break;
+					case 39:
+						this.rotatePlayer(e);
+						break;
+					default:
+						break;
+				}
 			}
 		}
 	};
@@ -110,11 +147,20 @@ class PlayerOne extends React.Component {
 	componentDidMount() {
 		document.addEventListener('keydown', this.movePlayer.bind(this));
 		document.addEventListener('keydown', this.shootLazer.bind(this));
-		this.setState({ startingPositionX: this.coords.left, startingPositionY: this.coords.top });
+		document.addEventListener('keydown', this.rotatePlayer.bind(this));
+		this.setState({
+			startingPositionX: this.coords.left,
+			startingPositionY: this.coords.top,
+			enemyHit: false,
+			character:
+				'https://res.cloudinary.com/snackmanproductions/image/upload/v1572219911/react-game/Ship2_trqgjh.png',
+		});
+		this.hits.splice(0, this.hits.length);
 	}
 	componentWillUnmount() {
 		document.removeEventListener('keydown', this.movePlayer.bind(this));
-		document.removeEventListener('keydown', this.shootLazer.bind(this));
+		document.removeEventListener('keydown', this.shootLazer).bind(this);
+		document.removeEventListener('mousemove', this.rotatePlayer.bind(this));
 	}
 	componentDidUpdate(prevProps, prevState) {
 		if (this.state.lazerPosition !== prevState.lazerPosition) {
@@ -126,14 +172,24 @@ class PlayerOne extends React.Component {
 	}
 
 	render() {
+		const playerStyle = {
+			backgroundImage: `url(${this.state.character})`,
+			backgroundSize: 'cover',
+			backgroundPosition: 'center',
+			display: 'block',
+			position: 'absolute',
+			height: `${this.dimensions.height}rem`,
+			width: `${this.dimensions.width}rem`,
+			transition: 'all .1s ease-in-out linear infinite',
+			transformOrigin: 'center',
+			transform: `translate(${this.state.startingPositionX}px, ${this.state.startingPositionY}px) 
+			rotate(${this.state.rotation}deg) `,
+		};
+
 		return (
 			<div
-				style={{
-					top: `${this.state.startingPositionY}vh`,
-					left: `${this.state.startingPositionX}vw`,
-					height: `${this.dimensions.height}rem`,
-					width: `${this.dimensions.width}rem`,
-				}}
+				style={{ ...playerStyle }}
+				ref={this.playerOneRef}
 				className={playerStyles.player__one}
 				onKeyDown={e => this.movePlayer(e)}
 			>

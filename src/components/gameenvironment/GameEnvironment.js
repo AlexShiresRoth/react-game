@@ -1,5 +1,6 @@
 import React from 'react';
 import PlayerOne from './players/PlayerOne';
+import Canvas from './canvas/Canvas';
 import layoutStyles from './gamestyles/GameEnvironment.module.scss';
 import LevelOne from './levels/LevelOne';
 import { connect } from 'react-redux';
@@ -12,6 +13,7 @@ class GameEnvironment extends React.Component {
 			enemyDimensions: [],
 			enemies: [],
 		};
+		this.canvasRef = React.createRef();
 		this.enemyRef1 = React.createRef();
 		this.enemyRef2 = React.createRef();
 		this.enemyRef3 = React.createRef();
@@ -37,14 +39,32 @@ class GameEnvironment extends React.Component {
 
 	render() {
 		const levelOneEnemies = [
-			{ enemy: 'enemyOne', ref: this.enemyRef1, coords: this.props.enemyCoords.enemyCoords[0] },
-			{ enemy: 'enemyTwo', ref: this.enemyRef2, coords: this.props.enemyCoords.enemyCoords[1] },
-			{ enemy: 'enemyThree', ref: this.enemyRef3, coords: this.props.enemyCoords.enemyCoords[2] },
+			{
+				enemy: 'enemyOne',
+				ref: this.enemyRef1,
+				coords: this.props.enemyCoords.enemyCoords[0],
+				spawnX: '40vw',
+				spawnY: '50vh',
+			},
+			{
+				enemy: 'enemyTwo',
+				ref: this.enemyRef2,
+				coords: this.props.enemyCoords.enemyCoords[1],
+				spawnX: '50vw',
+				spawnY: '20vh',
+			},
+			{
+				enemy: 'enemyThree',
+				ref: this.enemyRef3,
+				coords: this.props.enemyCoords.enemyCoords[2],
+				spawnX: '70vw',
+				spawnY: '45vw',
+			},
 		];
-		console.log(levelOneEnemies);
+
 		return (
-			<div className={layoutStyles.game__area}>
-				<PlayerOne enemyDimensions={this.state.enemyDimensions} />
+			<Canvas layoutStyles={layoutStyles} canvasRef={this.canvasRef}>
+				<PlayerOne enemyDimensions={this.state.enemyDimensions} canvasRef={this.canvasRef} />
 				<LevelOne
 					enemies={this.state.enemies}
 					levelOneEnemies={levelOneEnemies}
@@ -53,7 +73,7 @@ class GameEnvironment extends React.Component {
 					enemyDimensions={this.state.enemyDimensions}
 					setEnemyAmt={this.setEnemyAmt}
 				/>
-			</div>
+			</Canvas>
 		);
 	}
 }

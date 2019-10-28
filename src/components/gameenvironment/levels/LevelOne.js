@@ -16,6 +16,8 @@ const LevelOne = ({ enemies, levelOneEnemies, getDimensions, enemyDimensions, en
 				enemyHit={enemyHit}
 				key={i}
 				title={enemy.enemy}
+				randomSpawnX={enemy.spawnX}
+				randomSpawnY={enemy.spawnY}
 			/>
 		);
 	});
