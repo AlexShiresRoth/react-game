@@ -1,8 +1,9 @@
 import React, { useEffect } from 'react';
 import Enemy from '../players/Enemy';
+import Ground from './Ground';
 import PropTypes from 'prop-types';
 
-const LevelOne = ({ enemies, levelOneEnemies, getDimensions, enemyDimensions, enemyHit, setEnemyAmt }) => {
+const LevelOne = ({ enemies, levelOneEnemies, getDimensions, enemyDimensions, enemyHit, setEnemyAmt, groundRef }) => {
 	useEffect(() => {
 		return setEnemyAmt(levelOneEnemies);
 	}, []);
@@ -21,9 +22,20 @@ const LevelOne = ({ enemies, levelOneEnemies, getDimensions, enemyDimensions, en
 			/>
 		);
 	});
-	return <>{enemyMap}</>;
+	return (
+		<>
+			{enemyMap}
+			<Ground groundRef={groundRef} />
+		</>
+	);
 };
 
-LevelOne.propTypes = {};
+LevelOne.propTypes = {
+	groundRef: PropTypes.object.isRequired,
+	levelOneEnemies: PropTypes.array.isRequired,
+	enemyDimensions: PropTypes.array.isRequired,
+	enemyHit: PropTypes.object.isRequired,
+	setEnemyAmt: PropTypes.func.isRequired,
+};
 
 export default LevelOne;

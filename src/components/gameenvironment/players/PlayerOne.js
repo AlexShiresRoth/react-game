@@ -10,7 +10,7 @@ class PlayerOne extends React.Component {
 		super(props);
 		this.state = {
 			startingPositionX: null,
-			startingPositionY: null,
+			startingPositionY: this.props.groundHeight,
 			rotation: 0,
 			playerCoords: this.coords,
 			lazerPosition: {},
@@ -29,8 +29,8 @@ class PlayerOne extends React.Component {
 		left: 100,
 	};
 	dimensions = {
-		height: 4,
-		width: 7,
+		height: 10,
+		width: 5,
 	};
 
 	lazers = [];
@@ -78,19 +78,11 @@ class PlayerOne extends React.Component {
 		}
 	};
 	rotatePlayer = e => {
-		if (this.playerOneRef.current) {
-			const player = this.playerOneRef.current.getBoundingClientRect();
-
-			let playerCenter = [player.left + player.width / 2, player.top + player.height / 2];
-
-			let angle = Math.atan2(e.offsetX - playerCenter[0], -(e.offsetY - playerCenter[1])) * (180 / Math.PI);
-
-			if (e.which === 39) {
-				this.setState({ rotation: this.state.rotation + 10 });
-			}
-			if (e.which === 37) {
-				this.setState({ rotation: this.state.rotation - 10 });
-			}
+		if (e.which === 39) {
+			this.setState({ rotation: this.state.rotation + 10 });
+		}
+		if (e.which === 37) {
+			this.setState({ rotation: this.state.rotation - 10 });
 		}
 	};
 	//break the rotation to separate function with mouse move
@@ -145,22 +137,21 @@ class PlayerOne extends React.Component {
 	};
 
 	componentDidMount() {
+		console.log(this.props.groundHeight);
 		document.addEventListener('keydown', this.movePlayer.bind(this));
 		document.addEventListener('keydown', this.shootLazer.bind(this));
-		document.addEventListener('keydown', this.rotatePlayer.bind(this));
 		this.setState({
 			startingPositionX: this.coords.left,
-			startingPositionY: this.coords.top,
+			startingPositionY: this.props.groundHeight,
 			enemyHit: false,
 			character:
-				'https://res.cloudinary.com/snackmanproductions/image/upload/v1572219911/react-game/Ship2_trqgjh.png',
+				'https://res.cloudinary.com/snackmanproductions/image/upload/v1572316148/react-game/shot1_003_bjloun.png',
 		});
 		this.hits.splice(0, this.hits.length);
 	}
 	componentWillUnmount() {
 		document.removeEventListener('keydown', this.movePlayer.bind(this));
 		document.removeEventListener('keydown', this.shootLazer).bind(this);
-		document.removeEventListener('mousemove', this.rotatePlayer.bind(this));
 	}
 	componentDidUpdate(prevProps, prevState) {
 		if (this.state.lazerPosition !== prevState.lazerPosition) {
@@ -168,6 +159,15 @@ class PlayerOne extends React.Component {
 		}
 		if (this.state.enemyHit !== prevState.enemyHit) {
 			this.props.getEnemyHit(this.state.enemyHit);
+		}
+		if (this.props.groundHeight !== prevProps.groundHeight) {
+			if (this.playerOneRef.current) {
+				const player = this.playerOneRef.current.getBoundingClientRect();
+
+				const difference = this.props.groundHeight.groundHeight.top - player.height;
+				console.log(difference);
+				this.setState({ startingPositionY: difference });
+			}
 		}
 	}
 
@@ -214,6 +214,7 @@ const mapStateToProps = state => {
 	return {
 		enemyCoords: state.enemy,
 		enemyHit: state.enemyHit,
+		groundHeight: state.groundHeight,
 	};
 };
 

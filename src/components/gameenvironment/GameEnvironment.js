@@ -1,8 +1,8 @@
 import React from 'react';
 import PlayerOne from './players/PlayerOne';
 import Canvas from './canvas/Canvas';
-import layoutStyles from './gamestyles/GameEnvironment.module.scss';
 import LevelOne from './levels/LevelOne';
+import layoutStyles from './gamestyles/GameEnvironment.module.scss';
 import { connect } from 'react-redux';
 import { getEnemyCoordinates } from '../../actions/enemy';
 
@@ -17,6 +17,7 @@ class GameEnvironment extends React.Component {
 		this.enemyRef1 = React.createRef();
 		this.enemyRef2 = React.createRef();
 		this.enemyRef3 = React.createRef();
+		this.groundRef = React.createRef();
 		this.getDimensions = this.getDimensions.bind(this);
 	}
 	coordinates = [];
@@ -72,6 +73,7 @@ class GameEnvironment extends React.Component {
 					getDimensions={this.getDimensions}
 					enemyDimensions={this.state.enemyDimensions}
 					setEnemyAmt={this.setEnemyAmt}
+					groundRef={this.groundRef}
 				/>
 			</Canvas>
 		);
