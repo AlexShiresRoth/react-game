@@ -5,7 +5,7 @@ const Lazer = ({ lazerPosition, lazer, lazerRef, getLazerCoords }) => {
 	const lazerStyles = {
 		position: 'absolute',
 		height: '0.5rem',
-		width: '2rem',
+		width: '4rem',
 		top: '40%',
 		left: '100%',
 		background: 'orange',

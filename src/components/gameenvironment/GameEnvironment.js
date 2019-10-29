@@ -47,20 +47,6 @@ class GameEnvironment extends React.Component {
 				spawnX: '40vw',
 				spawnY: '50vh',
 			},
-			{
-				enemy: 'enemyTwo',
-				ref: this.enemyRef2,
-				coords: this.props.enemyCoords.enemyCoords[1],
-				spawnX: '50vw',
-				spawnY: '20vh',
-			},
-			{
-				enemy: 'enemyThree',
-				ref: this.enemyRef3,
-				coords: this.props.enemyCoords.enemyCoords[2],
-				spawnX: '70vw',
-				spawnY: '45vw',
-			},
 		];
 
 		return (

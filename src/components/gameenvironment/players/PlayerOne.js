@@ -29,8 +29,8 @@ class PlayerOne extends React.Component {
 		left: 100,
 	};
 	dimensions = {
-		height: 10,
-		width: 5,
+		height: 8,
+		width: 4,
 	};
 
 	lazers = [];
@@ -77,14 +77,34 @@ class PlayerOne extends React.Component {
 			}
 		}
 	};
+
+	jumpPlayer = (e, player) => {
+		if (e.keyCode === 87 || 38) {
+			let up = setInterval(() => {
+				this.setState({ startingPositionY: this.props.groundHeight.groundHeight.top - 4 });
+			}, 300);
+			setTimeout(() => {
+				clearInterval(up);
+			}, 600);
+			let down = setInterval(() => {
+				this.setState({ startingPositionY: this.coords.top + 4 });
+			}, 300);
+			setTimeout(() => {
+				clearInterval(down);
+				this.setState({ startingPositionY: this.props.groundHeight.groundHeight.top - player.height });
+			}, 601);
+		}
+	};
+
 	rotatePlayer = e => {
-		if (e.which === 39) {
+		if (e.keyCode === 39) {
 			this.setState({ rotation: this.state.rotation + 10 });
 		}
-		if (e.which === 37) {
+		if (e.keyCode === 37) {
 			this.setState({ rotation: this.state.rotation - 10 });
 		}
 	};
+
 	//break the rotation to separate function with mouse move
 	movePlayer = e => {
 		e.preventDefault();
@@ -92,18 +112,15 @@ class PlayerOne extends React.Component {
 			if (this.props.canvasRef.current && this.playerOneRef.current) {
 				const canvas = this.props.canvasRef.current.getBoundingClientRect();
 				const player = this.playerOneRef.current.getBoundingClientRect();
-				switch (e.which) {
-					case 87:
-					case 38:
-						this.setState({
-							startingPositionY:
-								this.coords.top > 0 ? (this.coords.top -= player.height) : (this.coords.top -= 0),
-						});
-						break;
+
+				switch (e.keyCode) {
 					case 65:
 						this.setState({
 							startingPositionX:
-								this.coords.left > 0 ? (this.coords.left -= player.width) : (this.coords.left -= 0),
+								this.coords.left > 0 + player.width
+									? (this.coords.left -= player.width)
+									: (this.coords.left -= 0),
+							rotation: 180,
 						});
 						break;
 					case 68:
@@ -112,16 +129,12 @@ class PlayerOne extends React.Component {
 								this.coords.left < canvas.width - player.width
 									? (this.coords.left += player.width)
 									: (this.coords.left += 0),
+							rotation: 0,
 						});
 						break;
-					case 83:
-					case 40:
-						this.setState({
-							startingPositionY:
-								this.coords.top < canvas.height - player.height
-									? (this.coords.top += player.height)
-									: (this.coords.top += 0),
-						});
+					case 87:
+					case 38:
+						this.jumpPlayer(e, player);
 						break;
 					case 37:
 						this.rotatePlayer(e);
@@ -137,7 +150,6 @@ class PlayerOne extends React.Component {
 	};
 
 	componentDidMount() {
-		console.log(this.props.groundHeight);
 		document.addEventListener('keydown', this.movePlayer.bind(this));
 		document.addEventListener('keydown', this.shootLazer.bind(this));
 		this.setState({
@@ -165,7 +177,7 @@ class PlayerOne extends React.Component {
 				const player = this.playerOneRef.current.getBoundingClientRect();
 
 				const difference = this.props.groundHeight.groundHeight.top - player.height;
-				console.log(difference);
+
 				this.setState({ startingPositionY: difference });
 			}
 		}
@@ -173,14 +185,10 @@ class PlayerOne extends React.Component {
 
 	render() {
 		const playerStyle = {
-			backgroundImage: `url(${this.state.character})`,
-			backgroundSize: 'cover',
-			backgroundPosition: 'center',
 			display: 'block',
 			position: 'absolute',
 			height: `${this.dimensions.height}rem`,
 			width: `${this.dimensions.width}rem`,
-			transition: 'all .1s ease-in-out linear infinite',
 			transformOrigin: 'center',
 			transform: `translate(${this.state.startingPositionX}px, ${this.state.startingPositionY}px) 
 			rotate(${this.state.rotation}deg) `,
@@ -193,6 +201,7 @@ class PlayerOne extends React.Component {
 				className={playerStyles.player__one}
 				onKeyDown={e => this.movePlayer(e)}
 			>
+				<img src={this.state.character} alt="Main Player"></img>
 				<Canon
 					playerStyles={playerStyles.canon}
 					shootLazer={this.shootLazer}
