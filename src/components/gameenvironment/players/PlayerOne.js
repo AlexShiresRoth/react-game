@@ -12,6 +12,7 @@ class PlayerOne extends React.Component {
 			startingPositionX: null,
 			startingPositionY: this.props.groundHeight,
 			rotation: 0,
+			interval: 0,
 			playerCoords: this.coords,
 			lazerPosition: {},
 			enemyHit: false,
@@ -67,7 +68,7 @@ class PlayerOne extends React.Component {
 				if (this.lazers.length > 4) {
 					this.lazers.pop();
 				}
-				setInterval(async () => {
+				setInterval(() => {
 					if (count <= 100) {
 						count += 2;
 						this.setState({ lazerPosition: { left: count } });
@@ -78,10 +79,33 @@ class PlayerOne extends React.Component {
 		}
 	};
 
-	jumpPlayer = (e, player) => {
+	jumpPlayer = e => {
+		const playerHeight = Math.floor(this.playerOneRef.current.getBoundingClientRect().height);
 		if (e.keyCode === 87 || 38) {
-			this.setState({ startingPositionY: this.props.groundHeight.groundHeight.top - 2 });
+			const max = 50;
+			if (this.state.interval <= max / 2) {
+				this.setState({
+					startingPositionY: this.state.startingPositionY - 8,
+					interval: this.state.interval + 1,
+				});
+			} else if (this.state.interval >= max / 2) {
+				this.setState({
+					startingPositionY: this.state.startingPositionY + 8,
+					interval: this.state.interval + 1,
+				});
+			}
+			this.handleAnimation(this.jumpPlayer, this.state.interval, max, playerHeight);
 		}
+		console.log(playerHeight);
+	};
+
+	handleAnimation = (animation, interval, max, playerHeight) => {
+		if (interval <= max) {
+			requestAnimationFrame(animation);
+		} else if (interval >= max) {
+			this.setState({ interval: 0, startingPositionY: this.props.groundHeight.groundHeight.top - playerHeight });
+		}
+		return cancelAnimationFrame(animation);
 	};
 
 	rotatePlayer = e => {
@@ -150,10 +174,12 @@ class PlayerOne extends React.Component {
 
 		this.hits.splice(0, this.hits.length);
 	}
+
 	componentWillUnmount() {
 		document.removeEventListener('keydown', this.movePlayer.bind(this));
 		document.removeEventListener('keydown', this.shootLazer).bind(this);
 	}
+
 	componentDidUpdate(prevProps, prevState) {
 		if (this.state.lazerPosition !== prevState.lazerPosition) {
 			this.registerHit();
