@@ -80,19 +80,7 @@ class PlayerOne extends React.Component {
 
 	jumpPlayer = (e, player) => {
 		if (e.keyCode === 87 || 38) {
-			let up = setInterval(() => {
-				this.setState({ startingPositionY: this.props.groundHeight.groundHeight.top - 4 });
-			}, 300);
-			setTimeout(() => {
-				clearInterval(up);
-			}, 600);
-			let down = setInterval(() => {
-				this.setState({ startingPositionY: this.coords.top + 4 });
-			}, 300);
-			setTimeout(() => {
-				clearInterval(down);
-				this.setState({ startingPositionY: this.props.groundHeight.groundHeight.top - player.height });
-			}, 601);
+			this.setState({ startingPositionY: this.props.groundHeight.groundHeight.top - 2 });
 		}
 	};
 
@@ -159,6 +147,7 @@ class PlayerOne extends React.Component {
 			character:
 				'https://res.cloudinary.com/snackmanproductions/image/upload/v1572316148/react-game/shot1_003_bjloun.png',
 		});
+
 		this.hits.splice(0, this.hits.length);
 	}
 	componentWillUnmount() {
