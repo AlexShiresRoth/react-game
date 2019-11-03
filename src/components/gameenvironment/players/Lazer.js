@@ -8,17 +8,16 @@ const Lazer = ({ lazerPosition, lazer, lazerRef, getLazerCoords }) => {
 
 	const animate = time => {
 		let interval = Math.floor((time * 0.01) % 100);
-		setCount(count => count + interval);
 
-		requestRef.current = requestAnimationFrame(animate);
-
-		if (interval >= 50) {
-			return cancelAnimationFrame(requestRef.current);
+		setCount(count + 1);
+		if (interval <= 50) {
+			requestRef.current = requestAnimationFrame(animate);
+		} else {
+			return () => cancelAnimationFrame(requestRef.current);
 		}
 	};
 
 	useEffect(() => {
-		console.log(lazerPosition);
 		requestRef.current = requestAnimationFrame(animate);
 
 		return () => cancelAnimationFrame(requestRef.current);

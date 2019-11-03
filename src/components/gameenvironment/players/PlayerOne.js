@@ -13,7 +13,7 @@ class PlayerOne extends React.Component {
 			startingPositionX: null,
 			startingPositionY: this.props.groundHeight,
 			rotation: 0,
-			interval: 0,
+			jumpInterval: 0,
 			lazerCount: 0,
 			playerCoords: this.coords,
 			lazerPosition: 0,
@@ -22,7 +22,7 @@ class PlayerOne extends React.Component {
 			hits: this.hits,
 			character: null,
 		};
-		this.movePlayer = this.movePlayer.bind(this);
+		this.playerController = this.playerController.bind(this);
 		this.shootLazer = this.shootLazer.bind(this);
 		this.playerOneRef = React.createRef();
 		this.animationRef = React.createRef();
@@ -62,52 +62,51 @@ class PlayerOne extends React.Component {
 		return this.state.hits.length > 0 ? this.setState({ enemyHit: true }) : this.setState({ enemyHit: false });
 	};
 
-	shootLazer = e => {
-		if (e.keyCode === 32) {
-			const max = 100;
-			this.lazers.push('lazer');
-
-			if (this.state.lazerCount <= max) {
-				this.setState({
-					lazerCount: this.state.lazerCount + 2,
-					lazerPosition: this.state.lazerCount,
-				});
-			}
-			if (this.state.lazerCount >= max) {
-				return () => cancelAnimationFrame(this.animationRef.current);
-			}
-
-			console.log(this.state.lazerCount);
-			this.animationRef.current = requestAnimationFrame(this.shootLazer);
+	shootLazer = time => {
+		const max = 100;
+		this.lazers.push('lazer');
+		if (this.state.lazerCount <= max) {
+			this.setState(prevState => {
+				return { lazerCount: prevState.lazerCount + 5, lazerPosition: this.state.lazerCount };
+			});
 		}
+
+		if (this.state.lazerCount >= max) {
+			this.setState({ lazerCount: 0, lazerPosition: this.state.lazerCount });
+			return () => cancelAnimationFrame(this.animationRef.current);
+		}
+		this.animationRef.current = requestAnimationFrame(this.shootLazer);
 	};
-	jumpPlayer = e => {
+
+	jumpPlayer = time => {
 		const playerHeight = this.props.playerHeight;
+		const max = 17;
 
-		if (e.keyCode === 87 || 38) {
-			const max = 17;
-			if (this.state.interval <= max / 2) {
-				this.setState({
-					startingPositionY: this.state.startingPositionY - playerHeight / 2,
-					interval: this.state.interval + 1,
-				});
-			}
-			if (this.state.interval >= max / 2) {
-				this.setState({
-					startingPositionY: this.state.startingPositionY + playerHeight / 2,
-					interval: this.state.interval + 1,
-				});
-			}
-			if (this.state.interval >= max) {
-				this.setState({
-					interval: 0,
-					startingPositionY: this.props.groundHeight.groundHeight.top - playerHeight,
-				});
-
-				return () => cancelAnimationFrame(this.animationRef.current);
-			}
-			this.animationRef.current = requestAnimationFrame(this.jumpPlayer);
+		if (this.state.jumpInterval <= max / 2) {
+			this.setState(prevState => {
+				return {
+					startingPositionY: prevState.startingPositionY - playerHeight / 2,
+					jumpInterval: prevState.jumpInterval + 1,
+				};
+			});
 		}
+		if (this.state.jumpInterval >= max / 2) {
+			this.setState(prevState => {
+				return {
+					startingPositionY: prevState.startingPositionY + playerHeight / 2,
+					jumpInterval: prevState.jumpInterval + 1,
+				};
+			});
+		}
+
+		if (this.state.jumpInterval >= max) {
+			this.setState({
+				jumpInterval: 0,
+				startingPositionY: this.props.groundHeight.groundHeight.top - playerHeight,
+			});
+			return () => cancelAnimationFrame(this.animationRef.current);
+		}
+		this.animationRef.current = requestAnimationFrame(this.jumpPlayer);
 	};
 
 	rotatePlayer = e => {
@@ -119,52 +118,51 @@ class PlayerOne extends React.Component {
 		}
 	};
 
-	movePlayer = e => {
+	playerController = e => {
 		e.preventDefault();
-		if (e) {
-			if (this.props.canvasRef.current && this.playerOneRef.current) {
-				const canvas = this.props.canvasRef.current.getBoundingClientRect();
-				const player = this.playerOneRef.current.getBoundingClientRect();
 
-				switch (e.keyCode) {
-					case 65:
-						this.setState({
-							startingPositionX:
-								this.coords.left > 0 + player.width
-									? (this.coords.left -= player.width)
-									: (this.coords.left -= 0),
-							rotation: 180,
-						});
-						break;
-					case 68:
-						this.setState({
-							startingPositionX:
-								this.coords.left < canvas.width - player.width
-									? (this.coords.left += player.width)
-									: (this.coords.left += 0),
-							rotation: 0,
-						});
-						break;
-					case 87:
-					case 38:
-						this.jumpPlayer(e, player);
-						break;
-					case 37:
-						this.rotatePlayer(e);
-						break;
-					case 39:
-						this.rotatePlayer(e);
-						break;
-					default:
-						break;
-				}
+		if (this.props.canvasRef.current && this.playerOneRef.current) {
+			const canvas = this.props.canvasRef.current.getBoundingClientRect();
+			const player = this.playerOneRef.current.getBoundingClientRect();
+
+			switch (e.keyCode) {
+				case 65:
+					this.setState({
+						startingPositionX:
+							this.coords.left > 0 + player.width
+								? (this.coords.left -= player.width)
+								: (this.coords.left -= 0),
+						rotation: 180,
+					});
+					break;
+				case 68:
+					this.setState({
+						startingPositionX:
+							this.coords.left < canvas.width - player.width
+								? (this.coords.left += player.width)
+								: (this.coords.left += 0),
+						rotation: 0,
+					});
+					break;
+				case 87:
+				case 38:
+					this.jumpPlayer(e, player);
+					break;
+				case 37:
+				case 39:
+					this.rotatePlayer(e);
+					break;
+				case 32:
+					this.shootLazer(e);
+					break;
+				default:
+					break;
 			}
 		}
 	};
 
 	componentDidMount() {
-		document.addEventListener('keydown', this.movePlayer.bind(this));
-		document.addEventListener('keydown', this.shootLazer.bind(this));
+		document.addEventListener('keydown', this.playerController.bind(this));
 
 		this.setState({
 			startingPositionX: this.coords.left,
@@ -182,8 +180,8 @@ class PlayerOne extends React.Component {
 	}
 
 	componentWillUnmount() {
-		document.removeEventListener('keydown', this.movePlayer.bind(this));
-		document.removeEventListener('keydown', this.shootLazer.bind(this));
+		document.removeEventListener('keydown', this.playerController.bind(this));
+		cancelAnimationFrame(this.animationRef.current);
 	}
 
 	componentDidUpdate(prevProps, prevState) {
@@ -220,7 +218,7 @@ class PlayerOne extends React.Component {
 				style={{ ...playerStyle }}
 				ref={this.playerOneRef}
 				className={playerStyles.player__one}
-				onKeyDown={e => this.movePlayer(e)}
+				onKeyDown={e => this.playerController(e)}
 			>
 				<img src={this.state.character} alt="Main Player"></img>
 				<Canon
