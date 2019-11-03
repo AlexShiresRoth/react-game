@@ -25,6 +25,7 @@ class PlayerOne extends React.Component {
 		this.movePlayer = this.movePlayer.bind(this);
 		this.shootLazer = this.shootLazer.bind(this);
 		this.playerOneRef = React.createRef();
+		this.animationRef = React.createRef();
 		this.lazerRef = React.createRef();
 	}
 	coords = {
@@ -62,27 +63,21 @@ class PlayerOne extends React.Component {
 	};
 
 	shootLazer = e => {
-		const max = 100;
-		if (e) {
+		if (e.keyCode === 32) {
+			const max = 100;
 			this.lazers.push('lazer');
-			this.setState({
-				lazerCount: this.state.lazerCount + 2,
-				lazerPosition: { left: this.state.lazerCount },
-			});
 
-			this.handleLazerAnimation(this.shootLazer, this.state.lazerCount, max);
-		}
-	};
+			if (this.state.lazerCount <= max) {
+				this.setState({
+					lazerCount: this.state.lazerCount + 2,
+				});
+			}
+			if (this.state.lazerCount >= max) {
+				return () => cancelAnimationFrame(this.shootLazer);
+			}
 
-	// Fix this, animation runs twice for some reason
-	handleLazerAnimation = (animation, count, max) => {
-		if (count <= max) {
-			requestAnimationFrame(animation);
-		} else if (count >= max) {
-			console.log('done');
-			this.setState({ lazerCount: 0, lazerPosition: { left: 0 } });
-
-			return cancelAnimationFrame(animation);
+			console.log(this.state.lazerCount);
+			requestAnimationFrame(this.shootLazer);
 		}
 	};
 
@@ -95,23 +90,23 @@ class PlayerOne extends React.Component {
 					startingPositionY: this.state.startingPositionY - playerHeight,
 					interval: this.state.interval + 1,
 				});
-			} else if (this.state.interval >= max / 2) {
+			}
+			if (this.state.interval >= max / 2) {
 				this.setState({
 					startingPositionY: this.state.startingPositionY + playerHeight,
 					interval: this.state.interval + 1,
 				});
 			}
-			this.handleJumpAnimation(this.jumpPlayer, this.state.interval, max, playerHeight);
-		}
-	};
+			if (this.state.interval >= max) {
+				this.setState({
+					interval: 0,
+					startingPositionY: this.props.groundHeight.groundHeight.top - playerHeight,
+				});
 
-	handleJumpAnimation = (animation, interval, max, playerHeight) => {
-		if (interval <= max) {
-			requestAnimationFrame(animation);
-		} else if (interval >= max) {
-			this.setState({ interval: 0, startingPositionY: this.props.groundHeight.groundHeight.top - playerHeight });
+				return () => cancelAnimationFrame();
+			}
+			requestAnimationFrame(this.jumpPlayer);
 		}
-		return cancelAnimationFrame(animation);
 	};
 
 	rotatePlayer = e => {
@@ -159,9 +154,6 @@ class PlayerOne extends React.Component {
 					case 39:
 						this.rotatePlayer(e);
 						break;
-					case 32:
-						this.shootLazer(e);
-						break;
 					default:
 						break;
 				}
@@ -189,7 +181,7 @@ class PlayerOne extends React.Component {
 
 	componentWillUnmount() {
 		document.removeEventListener('keydown', this.movePlayer.bind(this));
-		document.removeEventListener('keydown', this.shootLazer).bind(this);
+		document.removeEventListener('keydown', this.shootLazer.bind(this));
 	}
 
 	componentDidUpdate(prevProps, prevState) {

@@ -1,45 +1,44 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 
 const Lazer = ({ lazerPosition, lazer, lazerRef, getLazerCoords }) => {
+	const [count, setCount] = useState(0);
+
+	const requestRef = useRef();
+
+	const animate = time => {
+		let interval = Math.floor((time * 0.01) % 100);
+		setCount(count => count + interval);
+
+		requestRef.current = requestAnimationFrame(animate);
+
+		if (interval >= 50) {
+			return cancelAnimationFrame(requestRef.current);
+		}
+		console.log(count);
+	};
+
+	useEffect(() => {
+		requestRef.current = requestAnimationFrame(animate);
+
+		return () => cancelAnimationFrame(requestRef.current);
+	}, []);
+
 	const lazerStyles = {
 		position: 'absolute',
 		height: '0.5rem',
 		width: '4rem',
-		top: '40%',
-		left: '100%',
 		background: 'orange',
 		display: 'none',
 	};
-	const [count, setCount] = useState(0);
-
-	useEffect(() => {
-		if (lazerRef.current) {
-			let interval = setInterval(() => {
-				setCount(count => count + 1);
-			}, 200);
-
-			setTimeout(() => {
-				clearInterval(interval);
-			}, 900);
-
-			return () => clearInterval(interval);
-		}
-	}, []);
-
-	if (lazerRef.current) {
-		if (count < 10) {
-			getLazerCoords(lazerRef.current.getBoundingClientRect());
-		}
-	}
 	return (
 		<div
 			ref={lazerRef}
 			className={lazer}
 			style={{
 				...lazerStyles,
-				left: `${lazerPosition.left > 100 ? (lazerPosition.left = 0) : lazerPosition.left}vw`,
-				display: `${lazerPosition.left < 100 && lazerPosition.left > 0 ? 'block' : 'none'}`,
+				left: `${count}vw`,
+				display: `${lazerPosition.left <= 100 && lazerPosition.left >= 0 ? 'block' : 'none'}`,
 			}}
 		></div>
 	);
