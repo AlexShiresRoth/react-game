@@ -16,7 +16,7 @@ class PlayerOne extends React.Component {
 			interval: 0,
 			lazerCount: 0,
 			playerCoords: this.coords,
-			lazerPosition: {},
+			lazerPosition: 0,
 			enemyHit: false,
 			lazers: this.lazers,
 			hits: this.hits,
@@ -70,30 +70,31 @@ class PlayerOne extends React.Component {
 			if (this.state.lazerCount <= max) {
 				this.setState({
 					lazerCount: this.state.lazerCount + 2,
+					lazerPosition: this.state.lazerCount,
 				});
 			}
 			if (this.state.lazerCount >= max) {
-				return () => cancelAnimationFrame(this.shootLazer);
+				return () => cancelAnimationFrame(this.animationRef.current);
 			}
 
 			console.log(this.state.lazerCount);
-			requestAnimationFrame(this.shootLazer);
+			this.animationRef.current = requestAnimationFrame(this.shootLazer);
 		}
 	};
-
 	jumpPlayer = e => {
 		const playerHeight = this.props.playerHeight;
+
 		if (e.keyCode === 87 || 38) {
 			const max = 17;
 			if (this.state.interval <= max / 2) {
 				this.setState({
-					startingPositionY: this.state.startingPositionY - playerHeight,
+					startingPositionY: this.state.startingPositionY - playerHeight / 2,
 					interval: this.state.interval + 1,
 				});
 			}
 			if (this.state.interval >= max / 2) {
 				this.setState({
-					startingPositionY: this.state.startingPositionY + playerHeight,
+					startingPositionY: this.state.startingPositionY + playerHeight / 2,
 					interval: this.state.interval + 1,
 				});
 			}
@@ -103,9 +104,9 @@ class PlayerOne extends React.Component {
 					startingPositionY: this.props.groundHeight.groundHeight.top - playerHeight,
 				});
 
-				return () => cancelAnimationFrame();
+				return () => cancelAnimationFrame(this.animationRef.current);
 			}
-			requestAnimationFrame(this.jumpPlayer);
+			this.animationRef.current = requestAnimationFrame(this.jumpPlayer);
 		}
 	};
 
@@ -164,6 +165,7 @@ class PlayerOne extends React.Component {
 	componentDidMount() {
 		document.addEventListener('keydown', this.movePlayer.bind(this));
 		document.addEventListener('keydown', this.shootLazer.bind(this));
+
 		this.setState({
 			startingPositionX: this.coords.left,
 			startingPositionY: this.props.groundHeight,

@@ -15,10 +15,10 @@ const Lazer = ({ lazerPosition, lazer, lazerRef, getLazerCoords }) => {
 		if (interval >= 50) {
 			return cancelAnimationFrame(requestRef.current);
 		}
-		console.log(count);
 	};
 
 	useEffect(() => {
+		console.log(lazerPosition);
 		requestRef.current = requestAnimationFrame(animate);
 
 		return () => cancelAnimationFrame(requestRef.current);
@@ -37,15 +37,15 @@ const Lazer = ({ lazerPosition, lazer, lazerRef, getLazerCoords }) => {
 			className={lazer}
 			style={{
 				...lazerStyles,
-				left: `${count}vw`,
-				display: `${lazerPosition.left <= 100 && lazerPosition.left >= 0 ? 'block' : 'none'}`,
+				left: `${lazerPosition}vw`,
+				display: `${lazerPosition <= 100 && lazerPosition >= 0 ? 'block' : 'none'}`,
 			}}
 		></div>
 	);
 };
 
 Lazer.propTypes = {
-	lazerPosition: PropTypes.object.isRequired,
+	lazerPosition: PropTypes.number.isRequired,
 };
 
 export default Lazer;
