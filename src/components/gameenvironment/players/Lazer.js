@@ -1,34 +1,18 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 
 const Lazer = ({ lazerPosition, lazer, lazerRef, getLazerCoords }) => {
-	const [count, setCount] = useState(0);
-
-	const requestRef = useRef();
-
-	const animate = time => {
-		const max = 20;
-
-		setCount(prevCount => (prevCount += 1));
-
-		if (count >= max) {
-			setCount(count => (count = 0));
-			return () => cancelAnimationFrame(requestRef.current);
-		}
-
-		requestRef.current = requestAnimationFrame(animate);
-	};
-
 	useEffect(() => {
-		requestRef.current = requestAnimationFrame(animate);
+		if (lazerRef.current) {
+			let coords = lazerRef.current.getBoundingClientRect();
 
-		return () => cancelAnimationFrame(requestRef.current);
+			getLazerCoords(coords);
+		}
 	}, []);
-
 	const lazerStyles = {
 		position: 'absolute',
-		height: '0.5rem',
-		width: '4rem',
+		height: '0.2rem',
+		width: '2rem',
 		background: 'orange',
 		display: 'none',
 	};
@@ -38,15 +22,18 @@ const Lazer = ({ lazerPosition, lazer, lazerRef, getLazerCoords }) => {
 			className={lazer}
 			style={{
 				...lazerStyles,
-				left: `${lazerPosition}vw`,
-				display: `${lazerPosition <= 100 && lazerPosition >= 0 ? 'block' : 'none'}`,
+				left: `${lazerPosition.left}vw`,
+				display: `${lazerPosition.left <= 100 && lazerPosition.left >= 0 ? 'block' : 'none'}`,
 			}}
 		></div>
 	);
 };
 
 Lazer.propTypes = {
-	lazerPosition: PropTypes.number.isRequired,
+	lazerPosition: PropTypes.object.isRequired,
+	lazer: PropTypes.string.isRequired,
+	lazerRef: PropTypes.object.isRequired,
+	getLazerCoords: PropTypes.func.isRequired,
 };
 
 export default Lazer;

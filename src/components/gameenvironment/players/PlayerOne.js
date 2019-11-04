@@ -4,6 +4,7 @@ import Canon from './Canon';
 import playerStyles from './playerstyles/PlayerOne.module.scss';
 import { getEnemyHit } from '../../../actions/enemyHit';
 import { getPlayerHeight } from '../../../actions/player';
+import { getLazerCoordinates } from '../../../actions/player';
 import { connect } from 'react-redux';
 
 class PlayerOne extends React.Component {
@@ -16,7 +17,8 @@ class PlayerOne extends React.Component {
 			jumpInterval: 0,
 			lazerCount: 0,
 			playerCoords: this.coords,
-			lazerPosition: 0,
+			lazerPosition: {},
+			lazerCoords: {},
 			enemyHit: false,
 			lazers: this.lazers,
 			hits: this.hits,
@@ -44,6 +46,7 @@ class PlayerOne extends React.Component {
 		const enemies = this.props.enemyCoords.enemyCoords;
 		const lazer = lazerCoords;
 
+		if (this.state.lazerCount <= 15) this.setState({ lazerCoords: lazer });
 		enemies.map((enemy, i) => {
 			if (
 				lazer.x < enemy.x + enemy.width &&
@@ -62,51 +65,61 @@ class PlayerOne extends React.Component {
 		return this.state.hits.length > 0 ? this.setState({ enemyHit: true }) : this.setState({ enemyHit: false });
 	};
 
-	shootLazer = time => {
+	shootLazer = e => {
 		const max = 100;
-		this.lazers.push('lazer');
-		if (this.state.lazerCount <= max) {
-			this.setState(prevState => {
-				return { lazerCount: prevState.lazerCount + 5, lazerPosition: this.state.lazerCount };
-			});
-		}
+		if (!e.repeat) {
+			this.lazers.push('lazer');
+			if (this.lazers.length >= 10) {
+				this.lazers.splice(0, this.lazers.length);
+			}
+			if (this.state.lazerCount <= max) {
+				this.setState(prevState => {
+					return {
+						lazerCount: prevState.lazerCount + 10,
+						lazerPosition: { left: this.state.lazerCount, top: this.props.lazerCoords.top },
+					};
+				});
+			}
 
-		if (this.state.lazerCount >= max) {
-			this.setState({ lazerCount: 0, lazerPosition: this.state.lazerCount });
-			return () => cancelAnimationFrame(this.animationRef.current);
+			if (this.state.lazerCount >= max) {
+				this.setState({ lazerCount: 0, lazerPosition: { left: this.state.lazerCount, top: 0 } });
+				return () => cancelAnimationFrame(this.animationRef.current);
+			}
+
+			this.animationRef.current = requestAnimationFrame(this.shootLazer);
 		}
-		this.animationRef.current = requestAnimationFrame(this.shootLazer);
 	};
 
-	jumpPlayer = time => {
+	jumpPlayer = e => {
 		const playerHeight = this.props.playerHeight;
 		const max = 17;
+		if (!e.repeat) {
+			if (this.state.jumpInterval <= max / 2) {
+				this.setState(prevState => {
+					return {
+						startingPositionY: prevState.startingPositionY - playerHeight / 2,
+						jumpInterval: prevState.jumpInterval + 1,
+					};
+				});
+			}
+			if (this.state.jumpInterval >= max / 2) {
+				this.setState(prevState => {
+					return {
+						startingPositionY: prevState.startingPositionY + playerHeight / 2,
+						jumpInterval: prevState.jumpInterval + 1,
+					};
+				});
+			}
 
-		if (this.state.jumpInterval <= max / 2) {
-			this.setState(prevState => {
-				return {
-					startingPositionY: prevState.startingPositionY - playerHeight / 2,
-					jumpInterval: prevState.jumpInterval + 1,
-				};
-			});
+			if (this.state.jumpInterval >= max) {
+				this.setState({
+					jumpInterval: 0,
+					startingPositionY: this.props.groundHeight.groundHeight.top - playerHeight,
+				});
+				return () => cancelAnimationFrame(this.animationRef.current);
+			}
+			this.animationRef.current = requestAnimationFrame(this.jumpPlayer);
 		}
-		if (this.state.jumpInterval >= max / 2) {
-			this.setState(prevState => {
-				return {
-					startingPositionY: prevState.startingPositionY + playerHeight / 2,
-					jumpInterval: prevState.jumpInterval + 1,
-				};
-			});
-		}
-
-		if (this.state.jumpInterval >= max) {
-			this.setState({
-				jumpInterval: 0,
-				startingPositionY: this.props.groundHeight.groundHeight.top - playerHeight,
-			});
-			return () => cancelAnimationFrame(this.animationRef.current);
-		}
-		this.animationRef.current = requestAnimationFrame(this.jumpPlayer);
 	};
 
 	rotatePlayer = e => {
@@ -118,31 +131,35 @@ class PlayerOne extends React.Component {
 		}
 	};
 
+	movePlayer = (e, player, canvas) => {
+		if (e.keyCode === 65) {
+			this.setState({
+				startingPositionX:
+					this.coords.left > 0 + player.width ? (this.coords.left -= player.width) : (this.coords.left -= 0),
+				rotation: 180,
+			});
+		}
+		if (e.keyCode === 68) {
+			this.setState({
+				startingPositionX:
+					this.coords.left < canvas.width - player.width
+						? (this.coords.left += player.width)
+						: (this.coords.left += 0),
+				rotation: 0,
+			});
+		}
+	};
+
 	playerController = e => {
 		e.preventDefault();
-
 		if (this.props.canvasRef.current && this.playerOneRef.current) {
 			const canvas = this.props.canvasRef.current.getBoundingClientRect();
 			const player = this.playerOneRef.current.getBoundingClientRect();
 
 			switch (e.keyCode) {
 				case 65:
-					this.setState({
-						startingPositionX:
-							this.coords.left > 0 + player.width
-								? (this.coords.left -= player.width)
-								: (this.coords.left -= 0),
-						rotation: 180,
-					});
-					break;
 				case 68:
-					this.setState({
-						startingPositionX:
-							this.coords.left < canvas.width - player.width
-								? (this.coords.left += player.width)
-								: (this.coords.left += 0),
-						rotation: 0,
-					});
+					this.movePlayer(e, player, canvas);
 					break;
 				case 87:
 				case 38:
@@ -163,7 +180,6 @@ class PlayerOne extends React.Component {
 
 	componentDidMount() {
 		document.addEventListener('keydown', this.playerController.bind(this));
-
 		this.setState({
 			startingPositionX: this.coords.left,
 			startingPositionY: this.props.groundHeight,
@@ -199,6 +215,9 @@ class PlayerOne extends React.Component {
 
 				this.setState({ startingPositionY: difference });
 			}
+		}
+		if (this.state.lazerCoords !== prevState.lazerCoords) {
+			this.props.getLazerCoordinates(this.state.lazerCoords);
 		}
 	}
 
@@ -244,10 +263,11 @@ const mapStateToProps = state => {
 		enemyHit: state.enemyHit,
 		groundHeight: state.groundHeight,
 		playerHeight: state.player.playerHeight,
+		lazerCoords: state.player.lazerCoords,
 	};
 };
 
 export default connect(
 	mapStateToProps,
-	{ getEnemyHit, getPlayerHeight }
+	{ getEnemyHit, getPlayerHeight, getLazerCoordinates }
 )(PlayerOne);

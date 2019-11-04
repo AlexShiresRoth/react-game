@@ -33,6 +33,7 @@ const Canon = ({
 
 Canon.propTypes = {
 	shootLazer: PropTypes.func.isRequired,
+	lazerPosition: PropTypes.object.isRequired,
 };
 
 export default Canon;
