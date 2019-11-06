@@ -3,7 +3,7 @@ import { ENEMY_COORDINATES, ENEMY_AMOUNT, ENEMY_HIT } from "../actions/types";
 const initialState = {
   enemyCoords: {},
   enemyAmount: [],
-  enemyHit: false
+  enemyHit: []
 };
 
 export default (state = initialState, action) => {

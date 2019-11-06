@@ -18,7 +18,7 @@ class PlayerOne extends React.Component {
       playerCoords: this.coords,
       lazerPosition: {},
       lazerCoords: {},
-      enemyHit: null,
+      enemyHit: [],
       lazers: this.lazers,
       hits: this.hits,
       character: null
@@ -55,15 +55,12 @@ class PlayerOne extends React.Component {
         lazer.y < enemy.y + enemy.height &&
         lazer.y + lazer.height > enemy.y
       ) {
-        const enemyWasHitAt = enemies[i];
-        this.setState(prevState => ({
-          enemyAmount: {
-            ...prevState.enemyAmount,
-            [enemies[i]]: true
-          }
-        }));
+        let newEnemyState = { ...this.state.enemyHit };
+        newEnemyState[i].hit = true;
 
-        console.log(this.props.enemyAmount);
+        this.setState({
+          enemyHit: newEnemyState
+        });
       } else {
         return this.hits;
       }
@@ -218,6 +215,9 @@ class PlayerOne extends React.Component {
   componentDidUpdate(prevProps, prevState) {
     if (this.state.enemyHit !== prevState.enemyHit) {
       this.props.getEnemyHit(this.state.enemyHit);
+    }
+    if (this.props.enemyAmount !== prevProps.enemyAmount) {
+      this.setState({ enemyHit: this.props.enemyAmount });
     }
     if (this.props.groundHeight !== prevProps.groundHeight) {
       if (this.playerOneRef.current) {

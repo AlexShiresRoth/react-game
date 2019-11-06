@@ -60,7 +60,6 @@ class GameEnvironment extends React.Component {
         hit: false
       }
     ];
-
     return (
       <Canvas layoutStyles={layoutStyles} canvasRef={this.canvasRef}>
         <PlayerOne
