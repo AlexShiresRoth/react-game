@@ -2,9 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Canon from './Canon';
 import playerStyles from './playerstyles/PlayerOne.module.scss';
-import { getEnemyHit } from '../../../actions/enemyHit';
-import { getPlayerHeight } from '../../../actions/player';
-import { getLazerCoordinates } from '../../../actions/player';
+import { getEnemyHit } from '../../../actions/enemy';
+import { getLazerCoordinates, getPlayerHeight } from '../../../actions/player';
 import { connect } from 'react-redux';
 
 class PlayerOne extends React.Component {
@@ -43,17 +42,19 @@ class PlayerOne extends React.Component {
 	hits = [];
 
 	getLazerCoords = lazerCoords => {
-		const enemies = this.props.enemyCoords.enemyCoords;
+		const enemyLocations = this.props.enemyCoords;
 		const lazer = lazerCoords;
 
 		if (this.state.lazerCount <= 15) this.setState({ lazerCoords: lazer });
-		enemies.map((enemy, i) => {
+
+		enemyLocations.map((enemy, i) => {
 			if (
 				lazer.x < enemy.x + enemy.width &&
 				lazer.x + lazer.width > enemy.x &&
 				lazer.y < enemy.y + enemy.height &&
 				lazer.y + lazer.height > enemy.y
 			) {
+				console.log(enemy);
 				return this.hits.unshift('hit');
 			} else {
 				return this.hits;
@@ -259,8 +260,8 @@ PlayerOne.propTypes = {
 
 const mapStateToProps = state => {
 	return {
-		enemyCoords: state.enemy,
-		enemyHit: state.enemyHit,
+		enemyCoords: state.enemy.enemyCoords,
+		enemyHit: state.enemy.enemyHit,
 		groundHeight: state.groundHeight,
 		playerHeight: state.player.playerHeight,
 		lazerCoords: state.player.lazerCoords,

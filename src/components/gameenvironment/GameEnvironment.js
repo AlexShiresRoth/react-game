@@ -4,7 +4,7 @@ import Canvas from './canvas/Canvas';
 import LevelOne from './levels/LevelOne';
 import layoutStyles from './gamestyles/GameEnvironment.module.scss';
 import { connect } from 'react-redux';
-import { getEnemyCoordinates } from '../../actions/enemy';
+import { getEnemyCoordinates, setEnemyAmount } from '../../actions/enemy';
 
 class GameEnvironment extends React.Component {
 	constructor(props) {
@@ -36,6 +36,9 @@ class GameEnvironment extends React.Component {
 		if (this.state.enemyDimensions !== prevState.enemyDimensions) {
 			this.props.getEnemyCoordinates(this.state.enemyDimensions);
 		}
+		if (this.state.enemies !== prevState.enemies) {
+			this.props.setEnemyAmount(this.state.enemies);
+		}
 	}
 
 	render() {
@@ -43,9 +46,18 @@ class GameEnvironment extends React.Component {
 			{
 				enemy: 'enemyOne',
 				ref: this.enemyRef1,
-				coords: this.props.enemyCoords.enemyCoords[0],
+				coords: this.props.enemyCoords[0],
 				spawnX: '40vw',
 				spawnY: '50vh',
+				hit: false,
+			},
+			{
+				enemy: 'enemyOne',
+				ref: this.enemyRef2,
+				coords: this.props.enemyCoords[1],
+				spawnX: '60vw',
+				spawnY: '70vh',
+				hit: false,
 			},
 		];
 
@@ -66,9 +78,13 @@ class GameEnvironment extends React.Component {
 	}
 }
 const mapStateToProps = state => {
-	return { enemyCoords: state.enemy, enemyHit: state.enemyHit };
+	return {
+		enemyCoords: state.enemy.enemyCoords,
+		enemyHit: state.enemy.enemyHit,
+		enemyAmount: state.enemy.enemyAmount,
+	};
 };
 export default connect(
 	mapStateToProps,
-	{ getEnemyCoordinates }
+	{ getEnemyCoordinates, setEnemyAmount }
 )(GameEnvironment);
