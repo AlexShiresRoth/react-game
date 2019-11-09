@@ -17,8 +17,9 @@ const Enemy = ({ enemyRef, getDimensions, enemyHit, title, randomSpawnX, randomS
 
 			return getDimensions(enemy);
 		}
-		return;
+		return () => getDimensions([]);
 	}, []);
+
 	if (!enemyHit[index]) {
 		return (
 			<div

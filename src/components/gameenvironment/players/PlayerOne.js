@@ -22,6 +22,8 @@ class PlayerOne extends React.Component {
 			lazers: this.lazers,
 			hits: this.hits,
 			character: null,
+			characterPositionX: 1,
+			characterPositionY: 0,
 		};
 		this.playerController = this.playerController.bind(this);
 		this.shootLazer = this.shootLazer.bind(this);
@@ -34,8 +36,8 @@ class PlayerOne extends React.Component {
 		left: 100,
 	};
 	dimensions = {
-		height: 8,
-		width: 4,
+		height: 162,
+		width: 77,
 	};
 
 	lazers = [];
@@ -99,7 +101,7 @@ class PlayerOne extends React.Component {
 
 	jumpPlayer = e => {
 		const playerHeight = this.props.playerHeight;
-		const max = 17;
+		const max = 10;
 		if (!e.repeat) {
 			if (this.state.jumpInterval <= max / 2) {
 				this.setState(prevState => {
@@ -141,20 +143,22 @@ class PlayerOne extends React.Component {
 
 	movePlayer = (e, player, canvas) => {
 		if (e.keyCode === 65) {
-			this.setState({
+			this.setState(prevState => ({
 				startingPositionX:
 					this.coords.left > 0 + player.width ? (this.coords.left -= player.width) : (this.coords.left -= 0),
 				rotation: 180,
-			});
+				characterPositionX: (prevState.characterPositionX -= 77),
+			}));
 		}
 		if (e.keyCode === 68) {
-			this.setState({
+			this.setState(prevState => ({
 				startingPositionX:
 					this.coords.left < canvas.width - player.width
 						? (this.coords.left += player.width)
 						: (this.coords.left += 0),
 				rotation: 0,
-			});
+				characterPositionX: (prevState.characterPositionX += 77),
+			}));
 		}
 	};
 
@@ -193,7 +197,7 @@ class PlayerOne extends React.Component {
 			startingPositionY: this.props.groundHeight,
 			enemyHit: this.props.enemyAmount,
 			character:
-				'https://res.cloudinary.com/snackmanproductions/image/upload/v1572316148/react-game/shot1_003_bjloun.png',
+				'https://res.cloudinary.com/snackmanproductions/image/upload/v1573262579/react-game/spritesheet_2_chzdn0.png',
 		});
 		if (this.playerOneRef.current) {
 			const playerHeight = this.playerOneRef.current.getBoundingClientRect().height;
@@ -232,8 +236,9 @@ class PlayerOne extends React.Component {
 		const playerStyle = {
 			display: 'block',
 			position: 'absolute',
-			height: `${this.dimensions.height}rem`,
-			width: `${this.dimensions.width}rem`,
+			background: `url(${this.state.character}) ${this.state.characterPositionX}px ${this.state.characterPositionY}px`,
+			height: `${this.dimensions.height}px`,
+			width: `${this.dimensions.width}px`,
 			transformOrigin: 'center',
 			transform: `translate(${this.state.startingPositionX}px, ${this.state.startingPositionY}px) 
 			rotate(${this.state.rotation}deg) `,
@@ -246,7 +251,6 @@ class PlayerOne extends React.Component {
 				className={playerStyles.player__one}
 				onKeyDown={e => this.playerController(e)}
 			>
-				<img src={this.state.character} alt="Main Player"></img>
 				<Canon
 					playerStyles={playerStyles.canon}
 					shootLazer={this.shootLazer}
