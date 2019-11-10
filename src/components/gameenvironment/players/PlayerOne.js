@@ -14,34 +14,38 @@ class PlayerOne extends React.Component {
 			startingPositionY: this.props.groundHeight,
 			rotation: 0,
 			jumpInterval: 0,
+			idleInt: 0,
 			lazerCount: 0,
-			playerCoords: this.coords,
+			playerCoords: null,
 			lazerPosition: {},
 			lazerCoords: {},
 			enemyHit: {},
 			lazers: this.lazers,
 			hits: this.hits,
-			character: null,
+			character: { ...this.character },
 			characterPositionX: 1,
 			characterPositionY: 0,
 		};
 		this.playerController = this.playerController.bind(this);
+		this.setPlayerIdle = this.setPlayerIdle.bind(this);
 		this.shootLazer = this.shootLazer.bind(this);
 		this.playerOneRef = React.createRef();
 		this.animationRef = React.createRef();
+		this.timeRef = React.createRef();
 		this.lazerRef = React.createRef();
 	}
-	coords = {
-		top: 400,
-		left: 100,
-	};
-	dimensions = {
-		height: 162,
-		width: 77,
-	};
 
 	lazers = [];
 	hits = [];
+	character = {
+		img: 'https://res.cloudinary.com/snackmanproductions/image/upload/v1573332068/react-game/Idle_3_ynny6z.png',
+		width: 47,
+		height: 102,
+		coords: {
+			top: 500,
+			left: 100,
+		},
+	};
 
 	getLazerCoords = lazerCoords => {
 		const enemyLocations = this.props.enemyCoords;
@@ -78,7 +82,7 @@ class PlayerOne extends React.Component {
 			if (this.state.lazerCount <= max) {
 				this.setState(prevState => {
 					return {
-						lazerCount: prevState.lazerCount + 10,
+						lazerCount: prevState.lazerCount + 5,
 						lazerPosition: {
 							left: this.state.lazerCount,
 							top: this.props.lazerCoords.top,
@@ -101,12 +105,12 @@ class PlayerOne extends React.Component {
 
 	jumpPlayer = e => {
 		const playerHeight = this.props.playerHeight;
-		const max = 10;
+		const max = 25;
 		if (!e.repeat) {
 			if (this.state.jumpInterval <= max / 2) {
 				this.setState(prevState => {
 					return {
-						startingPositionY: prevState.startingPositionY - playerHeight / 2,
+						startingPositionY: prevState.startingPositionY - playerHeight / 10,
 						jumpInterval: prevState.jumpInterval + 1,
 					};
 				});
@@ -114,7 +118,7 @@ class PlayerOne extends React.Component {
 			if (this.state.jumpInterval >= max / 2) {
 				this.setState(prevState => {
 					return {
-						startingPositionY: prevState.startingPositionY + playerHeight / 2,
+						startingPositionY: prevState.startingPositionY + playerHeight / 10,
 						jumpInterval: prevState.jumpInterval + 1,
 					};
 				});
@@ -142,23 +146,98 @@ class PlayerOne extends React.Component {
 	};
 
 	movePlayer = (e, player, canvas) => {
+		const spriteSheet = 1125;
+		const spriteColumns = 15;
+		let difference;
+
+		if (this.state.characterPositionX % spriteColumns !== 0) {
+			difference = this.state.characterPositionX % spriteColumns;
+			this.setState(prevState => ({
+				characterPositionX: prevState.characterPositionX - difference,
+			}));
+		}
 		if (e.keyCode === 65) {
+			//go left
 			this.setState(prevState => ({
 				startingPositionX:
-					this.coords.left > 0 + player.width ? (this.coords.left -= player.width) : (this.coords.left -= 0),
+					prevState.character.coords.left > 0 + player.width
+						? (prevState.character.coords.left -= player.width)
+						: (prevState.character.coords.left -= 0),
 				rotation: 180,
-				characterPositionX: (prevState.characterPositionX -= 77),
+				character: {
+					...prevState.character,
+					img:
+						'https://res.cloudinary.com/snackmanproductions/image/upload/a_vflip/v1573334781/react-game/run_2_qyupdn.png',
+					width: spriteSheet / spriteColumns,
+				},
+				characterPositionX: prevState.characterPositionX - spriteSheet / spriteColumns,
 			}));
 		}
 		if (e.keyCode === 68) {
+			//go right
 			this.setState(prevState => ({
 				startingPositionX:
-					this.coords.left < canvas.width - player.width
-						? (this.coords.left += player.width)
-						: (this.coords.left += 0),
+					prevState.character.coords.left < canvas.width - player.width
+						? (prevState.character.coords.left += player.width)
+						: (prevState.character.coords.left += 0),
 				rotation: 0,
-				characterPositionX: (prevState.characterPositionX += 77),
+				character: {
+					...prevState.character,
+					img:
+						'https://res.cloudinary.com/snackmanproductions/image/upload/v1573334781/react-game/run_2_qyupdn.png',
+					width: spriteSheet / spriteColumns,
+				},
+				characterPositionX: (prevState.characterPositionX += spriteSheet / spriteColumns),
 			}));
+		}
+	};
+
+	playerIdle = time => {
+		const max = 100;
+		if (this.state.idleInt <= max || time.keyCode === 68 || time.keyCode === 65) {
+			const deltaTime = time - this.timeRef.current;
+			this.setState(prevState => ({
+				character: {
+					img:
+						prevState.rotation === 180
+							? 'https://res.cloudinary.com/snackmanproductions/image/upload/a_vflip/v1573334626/react-game/Idle_4_sankp5.png'
+							: 'https://res.cloudinary.com/snackmanproductions/image/upload/v1573334626/react-game/Idle_4_sankp5.png',
+					height: 102,
+					width: 47,
+					coords: {
+						top: prevState.character.coords.top,
+						left: prevState.character.coords.left,
+					},
+				},
+				idleInt: prevState.idleInt + ((deltaTime * 0.01) % 100),
+				characterPositionX: prevState.characterPositionX + 705 / 15,
+			}));
+			if (this.state.idleInt >= max) {
+				this.setState({ idleInt: 0, characterPositionX: 0 });
+			}
+
+			this.timeRef.current = time;
+		}
+		this.animationRef.current = requestAnimationFrame(this.playerIdle);
+	};
+
+	setPlayerIdle = e => {
+		e.preventDefault();
+		cancelAnimationFrame(this.timeRef.current);
+		if (this.props.canvasRef.current && this.playerOneRef.current) {
+			switch (e.keyCode) {
+				case 65:
+				case 68:
+				case 87:
+				case 38:
+				case 37:
+				case 39:
+				case 32:
+					this.playerIdle(e);
+					break;
+				default:
+					break;
+			}
 		}
 	};
 
@@ -192,23 +271,35 @@ class PlayerOne extends React.Component {
 
 	componentDidMount() {
 		document.addEventListener('keydown', this.playerController.bind(this));
+		document.addEventListener('keyup', this.setPlayerIdle.bind(this));
+		this.hits.splice(0, this.hits.length);
 		this.setState({
-			startingPositionX: this.coords.left,
-			startingPositionY: this.props.groundHeight,
 			enemyHit: this.props.enemyAmount,
-			character:
-				'https://res.cloudinary.com/snackmanproductions/image/upload/v1573262579/react-game/spritesheet_2_chzdn0.png',
+			characterPositionX: 1,
+			characterPositionY: 0,
+			character: {
+				img:
+					'https://res.cloudinary.com/snackmanproductions/image/upload/v1573334626/react-game/Idle_4_sankp5.png',
+				width: 47,
+				height: 102,
+				coords: {
+					top: 400,
+					left: 100,
+				},
+			},
 		});
 		if (this.playerOneRef.current) {
 			const playerHeight = this.playerOneRef.current.getBoundingClientRect().height;
 			this.props.getPlayerHeight(playerHeight);
+			this.timeRef.current = requestAnimationFrame(this.playerIdle);
 		}
-		this.hits.splice(0, this.hits.length);
 	}
 
 	componentWillUnmount() {
 		document.removeEventListener('keydown', this.playerController.bind(this));
+		document.removeEventListener('keyup', this.setPlayerIdle.bind(this));
 		cancelAnimationFrame(this.animationRef.current);
+		cancelAnimationFrame(this.timeRef.current);
 	}
 
 	componentDidUpdate(prevProps, prevState) {
@@ -227,6 +318,20 @@ class PlayerOne extends React.Component {
 				this.setState({ startingPositionY: difference });
 			}
 		}
+		if (this.state.startingPositionY !== prevState.startingPositionY) {
+			this.setState(prevState => ({
+				character: {
+					img:
+						'https://res.cloudinary.com/snackmanproductions/image/upload/v1573334626/react-game/Idle_4_sankp5.png',
+					width: 47,
+					height: 102,
+					coords: {
+						top: prevState.startingPositionY,
+						left: prevState.character.coords.left,
+					},
+				},
+			}));
+		}
 		if (this.state.lazerCoords !== prevState.lazerCoords) {
 			this.props.getLazerCoordinates(this.state.lazerCoords);
 		}
@@ -236,11 +341,11 @@ class PlayerOne extends React.Component {
 		const playerStyle = {
 			display: 'block',
 			position: 'absolute',
-			background: `url(${this.state.character}) ${this.state.characterPositionX}px ${this.state.characterPositionY}px`,
-			height: `${this.dimensions.height}px`,
-			width: `${this.dimensions.width}px`,
+			background: `url(${this.state.character.img}) ${this.state.characterPositionX}px ${this.state.characterPositionY}px`,
+			height: `${this.state.character.height}px`,
+			width: `${this.state.character.width}px`,
 			transformOrigin: 'center',
-			transform: `translate(${this.state.startingPositionX}px, ${this.state.startingPositionY}px) 
+			transform: `translate(${this.state.character.coords.left}px, ${this.state.character.coords.top}px) 
 			rotate(${this.state.rotation}deg) `,
 		};
 
@@ -250,6 +355,7 @@ class PlayerOne extends React.Component {
 				ref={this.playerOneRef}
 				className={playerStyles.player__one}
 				onKeyDown={e => this.playerController(e)}
+				onKeyUp={e => this.setPlayerIdle(e)}
 			>
 				<Canon
 					playerStyles={playerStyles.canon}

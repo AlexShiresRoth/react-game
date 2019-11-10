@@ -21,7 +21,7 @@ const LevelOne = ({
 			ref: enemyRef1,
 			coords: enemyCoords[0],
 			spawnX: '40vw',
-			spawnY: '50vh',
+			spawnY: '60vh',
 			hit: false,
 		},
 		{
