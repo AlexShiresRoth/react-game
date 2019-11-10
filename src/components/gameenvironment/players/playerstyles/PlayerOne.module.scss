@@ -1,12 +1,11 @@
 .player__one {
-	transition: all 0s ease 0s;
 	& img {
 		width: 100%;
 	}
 	& .canon {
 		position: absolute;
 		top: 60%;
-		left: 0%;
+		left: 100%;
 		background: transparent;
 		height: 1rem;
 		width: 2rem;

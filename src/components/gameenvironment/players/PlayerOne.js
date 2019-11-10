@@ -14,7 +14,7 @@ class PlayerOne extends React.Component {
 			startingPositionY: this.props.groundHeight,
 			rotation: 0,
 			jumpInterval: 0,
-			idleInt: 0,
+			runInterval: 0,
 			lazerCount: 0,
 			playerCoords: null,
 			lazerPosition: {},
@@ -27,7 +27,6 @@ class PlayerOne extends React.Component {
 			characterPositionY: 0,
 		};
 		this.playerController = this.playerController.bind(this);
-		this.setPlayerIdle = this.setPlayerIdle.bind(this);
 		this.shootLazer = this.shootLazer.bind(this);
 		this.playerOneRef = React.createRef();
 		this.animationRef = React.createRef();
@@ -106,12 +105,24 @@ class PlayerOne extends React.Component {
 	jumpPlayer = e => {
 		const playerHeight = this.props.playerHeight;
 		const max = 25;
+		const spriteSheet = 1538;
+		const spriteColumns = 15;
 		if (!e.repeat) {
 			if (this.state.jumpInterval <= max / 2) {
 				this.setState(prevState => {
 					return {
 						startingPositionY: prevState.startingPositionY - playerHeight / 10,
 						jumpInterval: prevState.jumpInterval + 1,
+						character: {
+							...prevState.character,
+							img:
+								prevState.rotation === 180
+									? 'https://res.cloudinary.com/snackmanproductions/image/upload/a_vflip/v1573348753/react-game/Jump_1_n7zwrr.png'
+									: 'https://res.cloudinary.com/snackmanproductions/image/upload/v1573348753/react-game/Jump_1_n7zwrr.png',
+							width: 60,
+						},
+						characterPositionX: 1,
+						characterPositionY: prevState.characterPositionY + spriteSheet / spriteColumns,
 					};
 				});
 			}
@@ -120,6 +131,16 @@ class PlayerOne extends React.Component {
 					return {
 						startingPositionY: prevState.startingPositionY + playerHeight / 10,
 						jumpInterval: prevState.jumpInterval + 1,
+						character: {
+							...prevState.character,
+							img:
+								prevState.rotation === 180
+									? 'https://res.cloudinary.com/snackmanproductions/image/upload/a_vflip/v1573348753/react-game/Jump_1_n7zwrr.png'
+									: 'https://res.cloudinary.com/snackmanproductions/image/upload/v1573348753/react-game/Jump_1_n7zwrr.png',
+							width: 60,
+						},
+						characterPositionX: 1,
+						characterPositionY: prevState.characterPositionY - spriteSheet / spriteColumns,
 					};
 				});
 			}
@@ -128,6 +149,16 @@ class PlayerOne extends React.Component {
 				this.setState({
 					jumpInterval: 0,
 					startingPositionY: this.props.groundHeight.groundHeight.top - playerHeight,
+					characterPositionY: 0,
+					characterPositionX: 0,
+					character: {
+						...this.state.character,
+						img:
+							this.state.rotation === 180
+								? 'https://res.cloudinary.com/snackmanproductions/image/upload/a_vflip/v1573334626/react-game/Idle_4_sankp5.png'
+								: 'https://res.cloudinary.com/snackmanproductions/image/upload/v1573334626/react-game/Idle_4_sankp5.png',
+						width: this.character.width,
+					},
 				});
 				return () => cancelAnimationFrame(this.animationRef.current);
 			}
@@ -148,6 +179,7 @@ class PlayerOne extends React.Component {
 	movePlayer = (e, player, canvas) => {
 		const spriteSheet = 1125;
 		const spriteColumns = 15;
+		const max = 15;
 		let difference;
 
 		if (this.state.characterPositionX % spriteColumns !== 0) {
@@ -158,87 +190,72 @@ class PlayerOne extends React.Component {
 		}
 		if (e.keyCode === 65) {
 			//go left
-			this.setState(prevState => ({
-				startingPositionX:
-					prevState.character.coords.left > 0 + player.width
-						? (prevState.character.coords.left -= player.width)
-						: (prevState.character.coords.left -= 0),
-				rotation: 180,
-				character: {
-					...prevState.character,
-					img:
-						'https://res.cloudinary.com/snackmanproductions/image/upload/a_vflip/v1573334781/react-game/run_2_qyupdn.png',
-					width: spriteSheet / spriteColumns,
-				},
-				characterPositionX: prevState.characterPositionX - spriteSheet / spriteColumns,
-			}));
+			if (this.state.runInterval <= max) {
+				this.setState(prevState => ({
+					runInterval: (prevState.runInterval += 1),
+					startingPositionX:
+						prevState.character.coords.left > 0 + player.width
+							? (prevState.character.coords.left -= player.width)
+							: (prevState.character.coords.left -= 0),
+					rotation: 180,
+					character: {
+						...prevState.character,
+						img:
+							'https://res.cloudinary.com/snackmanproductions/image/upload/a_vflip/v1573334781/react-game/run_2_qyupdn.png',
+						width: spriteSheet / spriteColumns,
+					},
+					characterPositionX: prevState.characterPositionX - spriteSheet / spriteColumns,
+				}));
+			}
+			if (this.state.runInterval >= max) {
+				this.setState(prevState => ({
+					runInterval: 0,
+					character: {
+						...prevState.character,
+						img:
+							this.state.rotation > 0
+								? 'https://res.cloudinary.com/snackmanproductions/image/upload/a_vflip/v1573334626/react-game/Idle_4_sankp5.png'
+								: 'https://res.cloudinary.com/snackmanproductions/image/upload/v1573334626/react-game/Idle_4_sankp5.png',
+					},
+				}));
+				return () => cancelAnimationFrame(this.animationRef.current);
+			}
 		}
 		if (e.keyCode === 68) {
 			//go right
-			this.setState(prevState => ({
-				startingPositionX:
-					prevState.character.coords.left < canvas.width - player.width
-						? (prevState.character.coords.left += player.width)
-						: (prevState.character.coords.left += 0),
-				rotation: 0,
-				character: {
-					...prevState.character,
-					img:
-						'https://res.cloudinary.com/snackmanproductions/image/upload/v1573334781/react-game/run_2_qyupdn.png',
-					width: spriteSheet / spriteColumns,
-				},
-				characterPositionX: (prevState.characterPositionX += spriteSheet / spriteColumns),
-			}));
-		}
-	};
-
-	playerIdle = time => {
-		const max = 100;
-		if (this.state.idleInt <= max || time.keyCode === 68 || time.keyCode === 65) {
-			const deltaTime = time - this.timeRef.current;
-			this.setState(prevState => ({
-				character: {
-					img:
-						prevState.rotation === 180
-							? 'https://res.cloudinary.com/snackmanproductions/image/upload/a_vflip/v1573334626/react-game/Idle_4_sankp5.png'
-							: 'https://res.cloudinary.com/snackmanproductions/image/upload/v1573334626/react-game/Idle_4_sankp5.png',
-					height: 102,
-					width: 47,
-					coords: {
-						top: prevState.character.coords.top,
-						left: prevState.character.coords.left,
+			if (this.state.runInterval <= max) {
+				this.setState(prevState => ({
+					runInterval: (prevState.runInterval += 1),
+					startingPositionX:
+						prevState.character.coords.left < canvas.width - player.width
+							? (prevState.character.coords.left += player.width)
+							: (prevState.character.coords.left += 0),
+					rotation: 0,
+					character: {
+						...prevState.character,
+						img:
+							'https://res.cloudinary.com/snackmanproductions/image/upload/v1573334781/react-game/run_2_qyupdn.png',
+						width: spriteSheet / spriteColumns,
 					},
-				},
-				idleInt: prevState.idleInt + ((deltaTime * 0.01) % 100),
-				characterPositionX: prevState.characterPositionX + 705 / 15,
-			}));
-			if (this.state.idleInt >= max) {
-				this.setState({ idleInt: 0, characterPositionX: 0 });
+					characterPositionX: (prevState.characterPositionX += spriteSheet / spriteColumns),
+				}));
 			}
-
-			this.timeRef.current = time;
-		}
-		this.animationRef.current = requestAnimationFrame(this.playerIdle);
-	};
-
-	setPlayerIdle = e => {
-		e.preventDefault();
-		cancelAnimationFrame(this.timeRef.current);
-		if (this.props.canvasRef.current && this.playerOneRef.current) {
-			switch (e.keyCode) {
-				case 65:
-				case 68:
-				case 87:
-				case 38:
-				case 37:
-				case 39:
-				case 32:
-					this.playerIdle(e);
-					break;
-				default:
-					break;
+			if (this.state.runInterval >= max) {
+				this.setState(prevState => ({
+					runInterval: 0,
+					character: {
+						...prevState.character,
+						img:
+							this.state.rotation > 0
+								? 'https://res.cloudinary.com/snackmanproductions/image/upload/a_vflip/v1573334626/react-game/Idle_4_sankp5.png'
+								: 'https://res.cloudinary.com/snackmanproductions/image/upload/v1573334626/react-game/Idle_4_sankp5.png',
+					},
+				}));
+				return () => cancelAnimationFrame(this.animationRef.current);
 			}
 		}
+		console.log(this.state.runInterval);
+		this.animationRef.current = requestAnimationFrame(this.movePlayer);
 	};
 
 	playerController = e => {
@@ -271,7 +288,6 @@ class PlayerOne extends React.Component {
 
 	componentDidMount() {
 		document.addEventListener('keydown', this.playerController.bind(this));
-		document.addEventListener('keyup', this.setPlayerIdle.bind(this));
 		this.hits.splice(0, this.hits.length);
 		this.setState({
 			enemyHit: this.props.enemyAmount,
@@ -291,15 +307,12 @@ class PlayerOne extends React.Component {
 		if (this.playerOneRef.current) {
 			const playerHeight = this.playerOneRef.current.getBoundingClientRect().height;
 			this.props.getPlayerHeight(playerHeight);
-			this.timeRef.current = requestAnimationFrame(this.playerIdle);
 		}
 	}
 
 	componentWillUnmount() {
 		document.removeEventListener('keydown', this.playerController.bind(this));
-		document.removeEventListener('keyup', this.setPlayerIdle.bind(this));
 		cancelAnimationFrame(this.animationRef.current);
-		cancelAnimationFrame(this.timeRef.current);
 	}
 
 	componentDidUpdate(prevProps, prevState) {
@@ -321,10 +334,7 @@ class PlayerOne extends React.Component {
 		if (this.state.startingPositionY !== prevState.startingPositionY) {
 			this.setState(prevState => ({
 				character: {
-					img:
-						'https://res.cloudinary.com/snackmanproductions/image/upload/v1573334626/react-game/Idle_4_sankp5.png',
-					width: 47,
-					height: 102,
+					...prevState.character,
 					coords: {
 						top: prevState.startingPositionY,
 						left: prevState.character.coords.left,
