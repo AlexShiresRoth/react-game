@@ -4,3 +4,4 @@ export const ENEMY_HIT = 'ENEMY_HIT';
 export const ENEMY_AMOUNT = 'ENEMY_AMOUNT';
 export const GROUND_HEIGHT = 'GROUND_HEIGHT';
 export const PLAYER_HEIGHT = 'PLAYER_HEIGHT';
+export const WINDOW_SIZE = 'WINDOW_SIZE';

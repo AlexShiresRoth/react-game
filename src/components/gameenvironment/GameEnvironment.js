@@ -24,7 +24,6 @@ class GameEnvironment extends React.Component {
 	coordinates = [];
 
 	setEnemyAmt = enemies => {
-		console.log(enemies);
 		return this.setState({ enemies: enemies });
 	};
 

@@ -14,7 +14,7 @@ class PlayerOne extends React.Component {
 			startingPositionY: this.props.groundHeight,
 			rotation: 0,
 			jumpInterval: 0,
-			runInterval: 0,
+			delay: 0,
 			lazerCount: 0,
 			playerCoords: null,
 			lazerPosition: {},
@@ -23,10 +23,11 @@ class PlayerOne extends React.Component {
 			lazers: this.lazers,
 			hits: this.hits,
 			character: { ...this.character },
-			characterPositionX: 1,
+			characterPositionX: 0,
 			characterPositionY: 0,
 		};
 		this.playerController = this.playerController.bind(this);
+		this.setIdleState = this.setIdleState.bind(this);
 		this.shootLazer = this.shootLazer.bind(this);
 		this.playerOneRef = React.createRef();
 		this.animationRef = React.createRef();
@@ -72,28 +73,39 @@ class PlayerOne extends React.Component {
 	};
 
 	shootLazer = e => {
+		const spriteSheet = 720;
+		const spriteColumns = 15;
 		const max = 100;
+
 		if (!e.repeat) {
 			this.lazers.push('lazer');
 			if (this.lazers.length >= 10) {
 				this.lazers.splice(0, this.lazers.length);
 			}
 			if (this.state.lazerCount <= max) {
-				this.setState(prevState => {
-					return {
-						lazerCount: prevState.lazerCount + 5,
-						lazerPosition: {
-							left: this.state.lazerCount,
-							top: this.props.lazerCoords.top,
-						},
-					};
-				});
+				this.setState(prevState => ({
+					lazerCount: prevState.lazerCount + 5,
+					lazerPosition: {
+						left: this.state.lazerCount,
+						top: this.props.lazerCoords.top,
+					},
+					character: {
+						...prevState.character,
+						img:
+							prevState.rotation > 0
+								? 'https://res.cloudinary.com/snackmanproductions/image/upload/a_vflip/v1573414999/react-game/Shot1_dcbxaq.png'
+								: 'https://res.cloudinary.com/snackmanproductions/image/upload/v1573414999/react-game/Shot1_dcbxaq.png',
+						width: spriteSheet / spriteColumns,
+					},
+					characterPositionX: prevState.characterPositionX + spriteSheet / spriteColumns,
+				}));
 			}
 
 			if (this.state.lazerCount >= max) {
 				this.setState({
 					lazerCount: 0,
 					lazerPosition: { left: this.state.lazerCount, top: 0 },
+					characterPositionX: 0,
 				});
 				return () => cancelAnimationFrame(this.animationRef.current);
 			}
@@ -179,87 +191,51 @@ class PlayerOne extends React.Component {
 	movePlayer = (e, player, canvas) => {
 		const spriteSheet = 1125;
 		const spriteColumns = 15;
-		const max = 15;
-		let difference;
+		if (e.repeat) {
+			this.setState({
+				delay: 1000,
+			});
+		}
 
-		if (this.state.characterPositionX % spriteColumns !== 0) {
-			difference = this.state.characterPositionX % spriteColumns;
+		if (typeof e === 'object' && e.keyCode === 65) {
+			//go left
+
 			this.setState(prevState => ({
-				characterPositionX: prevState.characterPositionX - difference,
+				startingPositionX:
+					prevState.character.coords.left > 0 + player.width
+						? (prevState.character.coords.left -= player.width / 2)
+						: (prevState.character.coords.left -= 0),
+				rotation: 180,
+				character: {
+					...prevState.character,
+					img:
+						'https://res.cloudinary.com/snackmanproductions/image/upload/a_vflip/v1573334781/react-game/run_2_qyupdn.png',
+					width: spriteSheet / spriteColumns,
+				},
+				characterPositionX: prevState.characterPositionX - spriteSheet / spriteColumns,
 			}));
 		}
-		if (e.keyCode === 65) {
-			//go left
-			if (this.state.runInterval <= max) {
-				this.setState(prevState => ({
-					runInterval: (prevState.runInterval += 1),
-					startingPositionX:
-						prevState.character.coords.left > 0 + player.width
-							? (prevState.character.coords.left -= player.width)
-							: (prevState.character.coords.left -= 0),
-					rotation: 180,
-					character: {
-						...prevState.character,
-						img:
-							'https://res.cloudinary.com/snackmanproductions/image/upload/a_vflip/v1573334781/react-game/run_2_qyupdn.png',
-						width: spriteSheet / spriteColumns,
-					},
-					characterPositionX: prevState.characterPositionX - spriteSheet / spriteColumns,
-				}));
-			}
-			if (this.state.runInterval >= max) {
-				this.setState(prevState => ({
-					runInterval: 0,
-					character: {
-						...prevState.character,
-						img:
-							this.state.rotation > 0
-								? 'https://res.cloudinary.com/snackmanproductions/image/upload/a_vflip/v1573334626/react-game/Idle_4_sankp5.png'
-								: 'https://res.cloudinary.com/snackmanproductions/image/upload/v1573334626/react-game/Idle_4_sankp5.png',
-					},
-				}));
-				return () => cancelAnimationFrame(this.animationRef.current);
-			}
-		}
-		if (e.keyCode === 68) {
+		if (typeof e === 'object' && e.keyCode === 68) {
 			//go right
-			if (this.state.runInterval <= max) {
-				this.setState(prevState => ({
-					runInterval: (prevState.runInterval += 1),
-					startingPositionX:
-						prevState.character.coords.left < canvas.width - player.width
-							? (prevState.character.coords.left += player.width)
-							: (prevState.character.coords.left += 0),
-					rotation: 0,
-					character: {
-						...prevState.character,
-						img:
-							'https://res.cloudinary.com/snackmanproductions/image/upload/v1573334781/react-game/run_2_qyupdn.png',
-						width: spriteSheet / spriteColumns,
-					},
-					characterPositionX: (prevState.characterPositionX += spriteSheet / spriteColumns),
-				}));
-			}
-			if (this.state.runInterval >= max) {
-				this.setState(prevState => ({
-					runInterval: 0,
-					character: {
-						...prevState.character,
-						img:
-							this.state.rotation > 0
-								? 'https://res.cloudinary.com/snackmanproductions/image/upload/a_vflip/v1573334626/react-game/Idle_4_sankp5.png'
-								: 'https://res.cloudinary.com/snackmanproductions/image/upload/v1573334626/react-game/Idle_4_sankp5.png',
-					},
-				}));
-				return () => cancelAnimationFrame(this.animationRef.current);
-			}
+
+			this.setState(prevState => ({
+				startingPositionX:
+					prevState.character.coords.left < canvas.width - player.width
+						? (prevState.character.coords.left += player.width / 2)
+						: (prevState.character.coords.left += 0),
+				rotation: 0,
+				character: {
+					...prevState.character,
+					img:
+						'https://res.cloudinary.com/snackmanproductions/image/upload/v1573334781/react-game/run_2_qyupdn.png',
+					width: spriteSheet / spriteColumns,
+				},
+				characterPositionX: (prevState.characterPositionX += spriteSheet / spriteColumns),
+			}));
 		}
-		console.log(this.state.runInterval);
-		this.animationRef.current = requestAnimationFrame(this.movePlayer);
 	};
 
 	playerController = e => {
-		e.preventDefault();
 		if (this.props.canvasRef.current && this.playerOneRef.current) {
 			const canvas = this.props.canvasRef.current.getBoundingClientRect();
 			const player = this.playerOneRef.current.getBoundingClientRect();
@@ -267,17 +243,25 @@ class PlayerOne extends React.Component {
 			switch (e.keyCode) {
 				case 65:
 				case 68:
+					e.preventDefault();
 					this.movePlayer(e, player, canvas);
 					break;
 				case 87:
 				case 38:
+					e.preventDefault();
 					this.jumpPlayer(e, player);
 					break;
 				case 37:
 				case 39:
+					e.preventDefault();
 					this.rotatePlayer(e);
 					break;
 				case 32:
+					e.preventDefault();
+					this.setState({
+						characterPositionX: 0,
+						characterPositionY: 0,
+					});
 					this.shootLazer(e);
 					break;
 				default:
@@ -286,8 +270,33 @@ class PlayerOne extends React.Component {
 		}
 	};
 
+	setIdleState = e => {
+		if (e.keyCode) {
+			if (!e.repeat) {
+				this.setState(prevState => ({
+					delay: prevState.delay + 1000,
+				}));
+			}
+			setTimeout(() => {
+				this.setState(prevState => ({
+					character: {
+						...prevState.character,
+						img:
+							prevState.rotation > 0
+								? 'https://res.cloudinary.com/snackmanproductions/image/upload/a_vflip/v1573410975/react-game/Idle_1_lbfkht.gif'
+								: 'https://res.cloudinary.com/snackmanproductions/image/upload/v1573410975/react-game/Idle_1_lbfkht.gif',
+						width: this.character.width,
+						height: 101,
+					},
+					characterPositionX: 0,
+				}));
+			}, this.state.delay);
+		}
+	};
+
 	componentDidMount() {
 		document.addEventListener('keydown', this.playerController.bind(this));
+		document.addEventListener('keyup', this.setIdleState.bind(this));
 		this.hits.splice(0, this.hits.length);
 		this.setState({
 			enemyHit: this.props.enemyAmount,
@@ -295,9 +304,9 @@ class PlayerOne extends React.Component {
 			characterPositionY: 0,
 			character: {
 				img:
-					'https://res.cloudinary.com/snackmanproductions/image/upload/v1573334626/react-game/Idle_4_sankp5.png',
+					'https://res.cloudinary.com/snackmanproductions/image/upload/v1573410975/react-game/Idle_1_lbfkht.gif',
 				width: 47,
-				height: 102,
+				height: 101,
 				coords: {
 					top: 400,
 					left: 100,
@@ -310,8 +319,19 @@ class PlayerOne extends React.Component {
 		}
 	}
 
+	locateGroundTop = () => {
+		if (this.playerOneRef.current) {
+			const player = this.playerOneRef.current.getBoundingClientRect();
+
+			const difference = this.props.groundHeight.groundHeight.top - player.height;
+
+			this.setState({ startingPositionY: difference });
+		}
+	};
+
 	componentWillUnmount() {
 		document.removeEventListener('keydown', this.playerController.bind(this));
+		document.removeEventListener('keyup', this.setIdleState.bind(this));
 		cancelAnimationFrame(this.animationRef.current);
 	}
 
@@ -323,13 +343,7 @@ class PlayerOne extends React.Component {
 			this.setState({ enemyHit: this.props.enemyAmount });
 		}
 		if (this.props.groundHeight !== prevProps.groundHeight) {
-			if (this.playerOneRef.current) {
-				const player = this.playerOneRef.current.getBoundingClientRect();
-
-				const difference = this.props.groundHeight.groundHeight.top - player.height;
-
-				this.setState({ startingPositionY: difference });
-			}
+			this.locateGroundTop();
 		}
 		if (this.state.startingPositionY !== prevState.startingPositionY) {
 			this.setState(prevState => ({
@@ -365,7 +379,7 @@ class PlayerOne extends React.Component {
 				ref={this.playerOneRef}
 				className={playerStyles.player__one}
 				onKeyDown={e => this.playerController(e)}
-				onKeyUp={e => this.setPlayerIdle(e)}
+				onKeyUp={e => this.setIdleState(e)}
 			>
 				<Canon
 					playerStyles={playerStyles.canon}

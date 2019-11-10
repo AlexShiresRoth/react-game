@@ -13,6 +13,13 @@ const Ground = props => {
 			setGroundHeight(groundTop);
 			props.getGroundHeight(groundTop);
 		}
+
+		const handleResize = () => {
+			props.getGroundHeight(props.groundRef.current.getBoundingClientRect());
+		};
+
+		window.addEventListener('resize', handleResize);
+		return () => window.removeEventListener('resize', handleResize);
 	}, []);
 	return <div className={groundStyle.ground} ref={props.groundRef}></div>;
 };
@@ -22,6 +29,7 @@ Ground.propTypes = {
 };
 
 const mapStateToProps = state => {
+	console.log(state.groundHeight);
 	return {
 		groundHeight: state.groundHeight,
 	};
