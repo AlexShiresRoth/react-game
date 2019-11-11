@@ -1,9 +1,12 @@
 import { ENEMY_COORDINATES, ENEMY_AMOUNT, ENEMY_HIT } from '../actions/types';
 
 const initialState = {
+	spriteSheetHeight: 0,
+	spriteSheetWidth: 0,
 	enemyCoords: {},
 	enemyAmount: [],
 	enemyHit: [],
+	enemyType: '',
 };
 
 export default (state = initialState, action) => {

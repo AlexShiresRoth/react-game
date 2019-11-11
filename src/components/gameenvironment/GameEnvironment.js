@@ -53,7 +53,6 @@ class GameEnvironment extends React.Component {
 					enemyDimensions={this.state.enemyDimensions}
 					setEnemyAmt={this.setEnemyAmt}
 					groundRef={this.groundRef}
-					enemyCoords={this.props.enemyCoords}
 					enemyRef1={this.enemyRef1}
 					enemyRef2={this.enemyRef2}
 				/>

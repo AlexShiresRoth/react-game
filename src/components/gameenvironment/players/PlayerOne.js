@@ -45,6 +45,14 @@ class PlayerOne extends React.Component {
 			top: 500,
 			left: 100,
 		},
+		canon: {
+			top: '60%',
+			left: '100%',
+			position: 'absolute',
+			background: 'transparent',
+			height: '1rem',
+			width: '2rem',
+		},
 	};
 
 	getLazerCoords = lazerCoords => {
@@ -62,8 +70,8 @@ class PlayerOne extends React.Component {
 			) {
 				let newEnemyState = { ...this.state.enemyHit };
 				newEnemyState[i].hit = true;
-
-				return this.setState({
+				this.hits.push('hit');
+				this.setState({
 					enemyHit: newEnemyState,
 				});
 			} else {
@@ -76,7 +84,7 @@ class PlayerOne extends React.Component {
 		const spriteSheet = 720;
 		const spriteColumns = 15;
 		const max = 100;
-
+		console.log(this.state.hits);
 		if (!e.repeat) {
 			this.lazers.push('lazer');
 			if (this.lazers.length >= 10) {
@@ -102,11 +110,11 @@ class PlayerOne extends React.Component {
 			}
 
 			if (this.state.lazerCount >= max) {
-				this.setState({
+				this.setState(prevState => ({
 					lazerCount: 0,
-					lazerPosition: { left: this.state.lazerCount, top: 0 },
+					lazerPosition: { left: 0, top: 0 },
 					characterPositionX: 0,
-				});
+				}));
 				return () => cancelAnimationFrame(this.animationRef.current);
 			}
 
@@ -211,6 +219,10 @@ class PlayerOne extends React.Component {
 					img:
 						'https://res.cloudinary.com/snackmanproductions/image/upload/a_vflip/v1573334781/react-game/run_2_qyupdn.png',
 					width: spriteSheet / spriteColumns,
+					canon: {
+						...this.character.canon,
+						top: '40%',
+					},
 				},
 				characterPositionX: prevState.characterPositionX - spriteSheet / spriteColumns,
 			}));
@@ -229,6 +241,10 @@ class PlayerOne extends React.Component {
 					img:
 						'https://res.cloudinary.com/snackmanproductions/image/upload/v1573334781/react-game/run_2_qyupdn.png',
 					width: spriteSheet / spriteColumns,
+					canon: {
+						...this.character.canon,
+						top: '60%',
+					},
 				},
 				characterPositionX: (prevState.characterPositionX += spriteSheet / spriteColumns),
 			}));
@@ -268,6 +284,7 @@ class PlayerOne extends React.Component {
 					break;
 			}
 		}
+		return () => cancelAnimationFrame(this.animationRef.current);
 	};
 
 	setIdleState = e => {
@@ -300,7 +317,7 @@ class PlayerOne extends React.Component {
 		this.hits.splice(0, this.hits.length);
 		this.setState({
 			enemyHit: this.props.enemyAmount,
-			characterPositionX: 1,
+			characterPositionX: 0,
 			characterPositionY: 0,
 			character: {
 				img:
@@ -308,8 +325,10 @@ class PlayerOne extends React.Component {
 				width: 47,
 				height: 101,
 				coords: {
-					top: 400,
-					left: 100,
+					...this.character.coords,
+				},
+				canon: {
+					...this.character.canon,
 				},
 			},
 		});
@@ -372,7 +391,6 @@ class PlayerOne extends React.Component {
 			transform: `translate(${this.state.character.coords.left}px, ${this.state.character.coords.top}px) 
 			rotate(${this.state.rotation}deg) `,
 		};
-
 		return (
 			<div
 				style={{ ...playerStyle }}
@@ -382,7 +400,8 @@ class PlayerOne extends React.Component {
 				onKeyUp={e => this.setIdleState(e)}
 			>
 				<Canon
-					playerStyles={playerStyles.canon}
+					canonClass={playerStyles}
+					canonStyles={this.state.character.canon}
 					shootLazer={this.shootLazer}
 					lazers={this.state.lazers}
 					lazerPosition={this.state.lazerPosition}

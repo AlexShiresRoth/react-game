@@ -21,7 +21,12 @@ const Ground = props => {
 		window.addEventListener('resize', handleResize);
 		return () => window.removeEventListener('resize', handleResize);
 	}, []);
-	return <div className={groundStyle.ground} ref={props.groundRef}></div>;
+	return (
+		<>
+			<div className={groundStyle.ground} ref={props.groundRef}></div>
+			<div className={groundStyle.rocks}></div>
+		</>
+	);
 };
 
 Ground.propTypes = {
@@ -29,7 +34,6 @@ Ground.propTypes = {
 };
 
 const mapStateToProps = state => {
-	console.log(state.groundHeight);
 	return {
 		groundHeight: state.groundHeight,
 	};

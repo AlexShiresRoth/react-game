@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Lazer from './Lazer';
 const Canon = ({
-	playerStyles,
+	canonClass,
 	shootLazer,
 	lazers,
 	lazerPosition,
@@ -10,9 +10,10 @@ const Canon = ({
 	lazerRef,
 	getLazerCoords,
 	lazerCount,
+	canonStyles,
 }) => {
 	return (
-		<div className={playerStyles} onKeyDown={e => shootLazer(e)}>
+		<div className={canonClass.canon} style={{ ...canonStyles }} onKeyDown={e => shootLazer(e)}>
 			{lazers.map((lazer, i) => {
 				return (
 					<Lazer

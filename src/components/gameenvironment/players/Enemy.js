@@ -1,31 +1,30 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
+import { getEnemyCoordinates } from '../../../actions/enemy';
 
-const Enemy = ({ enemyRef, getDimensions, enemyHit, title, randomSpawnX, randomSpawnY, index }) => {
-	const enemyStyle = {
-		height: '10rem',
-		width: '10rem',
-		position: 'absolute',
-		background: 'red',
-		display: 'block',
-		top: `${randomSpawnY}`,
-		left: `${randomSpawnX}`,
-	};
+const Enemy = ({ enemyRef, getDimensions, enemyHit, title, index, enemyStyles }) => {
+	const [enemyImg, setEnemyImg] = useState('');
+	//possibly get rid of this when more awake
+	const [enemyCoordinates, setEnemyCoordinates] = useState({});
+
 	useEffect(() => {
 		if (enemyRef.current) {
-			const enemy = enemyRef.current.getBoundingClientRect();
-
-			return getDimensions(enemy);
+			setEnemyImg(
+				'https://res.cloudinary.com/snackmanproductions/image/upload/v1573431925/react-game/idle_stufr8.png'
+			);
+			setEnemyCoordinates(enemyRef.current.getBoundingClientRect());
+			getEnemyCoordinates(enemyRef.current.getBoundingClientRect());
+			getDimensions(enemyRef.current.getBoundingClientRect());
 		}
-		return () => getDimensions([]);
 	}, []);
-
 	if (!enemyHit[index]) {
 		return (
 			<div
 				className={title}
 				style={{
-					...enemyStyle,
+					...enemyStyles,
+					background: `url(${enemyImg}) 0px 0px`,
 				}}
 				ref={enemyRef}
 			></div>
@@ -35,7 +34,8 @@ const Enemy = ({ enemyRef, getDimensions, enemyHit, title, randomSpawnX, randomS
 		<div
 			className={title}
 			style={{
-				...enemyStyle,
+				...enemyStyles,
+				background: `url(${enemyImg}) 0px 0px`,
 				display: `${enemyHit[index].hit ? 'none' : 'block'}`,
 			}}
 			ref={enemyRef}
@@ -48,4 +48,11 @@ Enemy.propTypes = {
 	getDimensions: PropTypes.func.isRequired,
 };
 
-export default Enemy;
+const mapStateToProps = state => {
+	return { enemyCoords: state.enemy.enemyCoords };
+};
+
+export default connect(
+	mapStateToProps,
+	{ getEnemyCoordinates }
+)(Enemy);
