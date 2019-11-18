@@ -1,13 +1,13 @@
-export const getGroundHeight = dimensions => async dispatch => {
+export const getGroundDimensions = dimensions => async dispatch => {
 	dispatch({
-		type: 'GROUND_HEIGHT',
+		type: 'GROUND_DIMENSIONS',
 		payload: await dimensions,
 	});
 };
 
-export const getWindowSize = dimensions => async dispatch => {
+export const getCanvasSize = dimensions => async dispatch => {
 	dispatch({
-		type: 'WINDOW_SIZE',
+		type: 'CANVAS_DIMENSIONS',
 		payload: await dimensions,
 	});
 };

@@ -1,18 +1,31 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
+import { getCanvasSize } from '../../../actions/gameArea';
 
-class Canvas extends React.Component {
-	render() {
-		return (
-			<div ref={this.props.canvasRef} className={this.props.layoutStyles.game__area}>
-				{this.props.children}
-			</div>
-		);
-	}
-}
+const Canvas = ({ getCanvasSize, canvasRef, children, layoutStyles }) => {
+	useEffect(() => {
+		if (canvasRef.current) {
+			let canvasDimensions = canvasRef.current.getBoundingClientRect();
+
+			getCanvasSize(canvasDimensions);
+		}
+	}, []);
+	return (
+		<div ref={canvasRef} className={layoutStyles.game__area}>
+			{children}
+		</div>
+	);
+};
 
 Canvas.propTypes = {
 	layoutStyles: PropTypes.object.isRequired,
 };
 
-export default Canvas;
+const mapStateToProps = state => {
+	return {
+		gameArea: state.gameArea,
+	};
+};
+
+export default connect(mapStateToProps, { getCanvasSize })(Canvas);

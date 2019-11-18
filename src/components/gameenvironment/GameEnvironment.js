@@ -33,6 +33,9 @@ class GameEnvironment extends React.Component {
 
 		return this.setState({ enemyDimensions: [...this.coordinates] });
 	};
+	componentDidMount() {
+		window.scrollTo(0, 0);
+	}
 
 	componentDidUpdate(prevProps, prevState) {
 		if (this.state.enemyDimensions !== prevState.enemyDimensions) {
@@ -67,7 +70,4 @@ const mapStateToProps = state => {
 		enemyAmount: state.enemy.enemyAmount,
 	};
 };
-export default connect(
-	mapStateToProps,
-	{ getEnemyCoordinates, setEnemyAmount }
-)(GameEnvironment);
+export default connect(mapStateToProps, { getEnemyCoordinates, setEnemyAmount })(GameEnvironment);

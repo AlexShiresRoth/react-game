@@ -1,21 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import groundStyle from './levelonestyles/Ground.module.scss';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { getGroundHeight } from '../../../actions/gameArea';
+import { getGroundDimensions } from '../../../actions/gameArea';
 
-const Ground = props => {
-	const [groundHeight, setGroundHeight] = useState(0);
-
+const Ground = ({ gameArea, groundRef, getGroundDimensions }) => {
 	useEffect(() => {
-		if (props.groundRef.current) {
-			const groundTop = props.groundRef.current.getBoundingClientRect();
-			setGroundHeight(groundTop);
-			props.getGroundHeight(groundTop);
+		if (groundRef.current) {
+			const ground = groundRef.current.getBoundingClientRect();
+
+			getGroundDimensions(ground);
 		}
 
 		const handleResize = () => {
-			props.getGroundHeight(props.groundRef.current.getBoundingClientRect());
+			getGroundDimensions(groundRef.current.getBoundingClientRect());
 		};
 
 		window.addEventListener('resize', handleResize);
@@ -23,8 +21,11 @@ const Ground = props => {
 	}, []);
 	return (
 		<>
-			<div className={groundStyle.ground} ref={props.groundRef}></div>
-			<div className={groundStyle.rocks}></div>
+			<div
+				className={groundStyle.ground}
+				style={{ width: `${gameArea.canvasSize.width}px` }}
+				ref={groundRef}
+			></div>
 		</>
 	);
 };
@@ -35,11 +36,8 @@ Ground.propTypes = {
 
 const mapStateToProps = state => {
 	return {
-		groundHeight: state.groundHeight,
+		gameArea: state.gameArea,
 	};
 };
 
-export default connect(
-	mapStateToProps,
-	{ getGroundHeight }
-)(Ground);
+export default connect(mapStateToProps, { getGroundDimensions })(Ground);

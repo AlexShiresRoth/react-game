@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import Canon from './Canon';
 import playerStyles from './playerstyles/PlayerOne.module.scss';
 import { getEnemyHit } from '../../../actions/enemy';
-import { getLazerCoordinates, getPlayerHeight } from '../../../actions/player';
+import { getLazerCoordinates, getPlayerDimensions } from '../../../actions/player';
 import { connect } from 'react-redux';
 
 class PlayerOne extends React.Component {
@@ -71,7 +71,7 @@ class PlayerOne extends React.Component {
 				let newEnemyState = { ...this.state.enemyHit };
 				newEnemyState[i].hit = true;
 				this.hits.push('hit');
-				this.setState({
+				return this.setState({
 					enemyHit: newEnemyState,
 				});
 			} else {
@@ -123,7 +123,7 @@ class PlayerOne extends React.Component {
 	};
 
 	jumpPlayer = e => {
-		const playerHeight = this.props.playerHeight;
+		const playerHeight = this.props.player.playerDimensions.height;
 		const max = 25;
 		const spriteSheet = 1538;
 		const spriteColumns = 15;
@@ -168,7 +168,7 @@ class PlayerOne extends React.Component {
 			if (this.state.jumpInterval >= max) {
 				this.setState({
 					jumpInterval: 0,
-					startingPositionY: this.props.groundHeight.groundHeight.top - playerHeight,
+					startingPositionY: this.props.groundDimensions.top - playerHeight,
 					characterPositionY: 0,
 					characterPositionX: 0,
 					character: {
@@ -186,16 +186,6 @@ class PlayerOne extends React.Component {
 		}
 	};
 
-	rotatePlayer = e => {
-		const playerHeight = this.props.playerHeight;
-		if (e.keyCode === 39) {
-			this.setState({ rotation: this.state.rotation + playerHeight / 2 });
-		}
-		if (e.keyCode === 37) {
-			this.setState({ rotation: this.state.rotation - playerHeight / 2 });
-		}
-	};
-
 	movePlayer = (e, player, canvas) => {
 		const spriteSheet = 1125;
 		const spriteColumns = 15;
@@ -207,7 +197,8 @@ class PlayerOne extends React.Component {
 
 		if (typeof e === 'object' && e.keyCode === 65) {
 			//go left
-
+			this.props.groundDimensions.x += player.width;
+			console.log(this.props.groundDimensions);
 			this.setState(prevState => ({
 				startingPositionX:
 					prevState.character.coords.left > 0 + player.width
@@ -230,6 +221,7 @@ class PlayerOne extends React.Component {
 		if (typeof e === 'object' && e.keyCode === 68) {
 			//go right
 
+			this.props.groundDimensions.x -= player.width;
 			this.setState(prevState => ({
 				startingPositionX:
 					prevState.character.coords.left < canvas.width - player.width
@@ -248,6 +240,7 @@ class PlayerOne extends React.Component {
 				},
 				characterPositionX: (prevState.characterPositionX += spriteSheet / spriteColumns),
 			}));
+			console.log(this.props.groundDimensions);
 		}
 	};
 
@@ -266,11 +259,6 @@ class PlayerOne extends React.Component {
 				case 38:
 					e.preventDefault();
 					this.jumpPlayer(e, player);
-					break;
-				case 37:
-				case 39:
-					e.preventDefault();
-					this.rotatePlayer(e);
 					break;
 				case 32:
 					e.preventDefault();
@@ -315,6 +303,7 @@ class PlayerOne extends React.Component {
 		document.addEventListener('keydown', this.playerController.bind(this));
 		document.addEventListener('keyup', this.setIdleState.bind(this));
 		this.hits.splice(0, this.hits.length);
+
 		this.setState({
 			enemyHit: this.props.enemyAmount,
 			characterPositionX: 0,
@@ -333,8 +322,8 @@ class PlayerOne extends React.Component {
 			},
 		});
 		if (this.playerOneRef.current) {
-			const playerHeight = this.playerOneRef.current.getBoundingClientRect().height;
-			this.props.getPlayerHeight(playerHeight);
+			const playerDimensions = this.playerOneRef.current.getBoundingClientRect();
+			this.props.getPlayerDimensions(playerDimensions);
 		}
 	}
 
@@ -342,7 +331,7 @@ class PlayerOne extends React.Component {
 		if (this.playerOneRef.current) {
 			const player = this.playerOneRef.current.getBoundingClientRect();
 
-			const difference = this.props.groundHeight.groundHeight.top - player.height;
+			const difference = this.props.groundDimensions.top - player.height;
 
 			this.setState({ startingPositionY: difference });
 		}
@@ -361,7 +350,7 @@ class PlayerOne extends React.Component {
 		if (this.props.enemyAmount !== prevProps.enemyAmount) {
 			this.setState({ enemyHit: this.props.enemyAmount });
 		}
-		if (this.props.groundHeight !== prevProps.groundHeight) {
+		if (this.props.groundDimensions !== prevProps.groundDimensions) {
 			this.locateGroundTop();
 		}
 		if (this.state.startingPositionY !== prevState.startingPositionY) {
@@ -422,13 +411,11 @@ const mapStateToProps = state => {
 		enemyCoords: state.enemy.enemyCoords,
 		enemyAmount: state.enemy.enemyAmount,
 		enemyHit: state.enemy.enemyHit,
-		groundHeight: state.groundHeight,
+		groundDimensions: state.gameArea.groundDimensions,
 		playerHeight: state.player.playerHeight,
+		player: state.player,
 		lazerCoords: state.player.lazerCoords,
 	};
 };
 
-export default connect(
-	mapStateToProps,
-	{ getEnemyHit, getPlayerHeight, getLazerCoordinates }
-)(PlayerOne);
+export default connect(mapStateToProps, { getEnemyHit, getPlayerDimensions, getLazerCoordinates })(PlayerOne);

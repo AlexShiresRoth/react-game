@@ -1,7 +1,7 @@
-export const getPlayerHeight = height => async dispatch => {
+export const getPlayerDimensions = dimensions => async dispatch => {
 	dispatch({
-		type: 'PLAYER_HEIGHT',
-		payload: await height,
+		type: 'PLAYER_DIMENSIONS',
+		payload: await dimensions,
 	});
 };
 export const getLazerCoordinates = lazerCoords => async dispatch => {

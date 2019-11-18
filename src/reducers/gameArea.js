@@ -1,21 +1,21 @@
-import { GROUND_HEIGHT, WINDOW_SIZE } from '../actions/types';
+import { GROUND_DIMENSIONS, CANVAS_DIMENSIONS } from '../actions/types';
 
 const initialState = {
-	groundHeight: {},
-	windowSize: {},
+	groundDimensions: {},
+	canvasSize: {},
 };
 export default (state = initialState, action) => {
 	const { type, payload } = action;
 	switch (type) {
-		case GROUND_HEIGHT:
+		case GROUND_DIMENSIONS:
 			return {
 				...state,
-				groundHeight: payload,
+				groundDimensions: payload,
 			};
-		case WINDOW_SIZE:
+		case CANVAS_DIMENSIONS:
 			return {
 				...state,
-				windowSize: payload,
+				canvasSize: payload,
 			};
 		default:
 			return state;
