@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { getGroundDimensions } from '../../../actions/gameArea';
 
-const Ground = ({ gameArea, groundRef, getGroundDimensions }) => {
+const Ground = ({ gameArea, groundRef, getGroundDimensions, getWindowSize }) => {
 	useEffect(() => {
 		if (groundRef.current) {
 			const ground = groundRef.current.getBoundingClientRect();

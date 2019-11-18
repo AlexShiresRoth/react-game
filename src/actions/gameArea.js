@@ -11,3 +11,10 @@ export const getCanvasSize = dimensions => async dispatch => {
 		payload: await dimensions,
 	});
 };
+
+export const getWindowSize = dimensions => async dispatch => {
+	dispatch({
+		type: 'WINDOW_DIMENSIONS',
+		payload: await dimensions,
+	});
+};

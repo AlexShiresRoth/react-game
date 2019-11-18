@@ -1,9 +1,10 @@
 import React from 'react';
-import PlayerOne from './players/PlayerOne';
+import PlayerOneController from './players/PlayerOneController';
 import Canvas from './canvas/Canvas';
 import LevelOne from './levels/LevelOne';
 import layoutStyles from './gamestyles/GameEnvironment.module.scss';
 import { connect } from 'react-redux';
+import { getWindowSize } from '../../actions/gameArea';
 import { getEnemyCoordinates, setEnemyAmount } from '../../actions/enemy';
 
 class GameEnvironment extends React.Component {
@@ -33,8 +34,22 @@ class GameEnvironment extends React.Component {
 
 		return this.setState({ enemyDimensions: [...this.coordinates] });
 	};
+
+	handleResize = () => {
+		this.props.getWindowSize(window.innerWidth);
+	};
+
 	componentDidMount() {
-		window.scrollTo(0, 0);
+		//restart camera position
+		setTimeout(() => {
+			window.scroll(0, 0);
+		}, 1000);
+
+		this.handleResize();
+		window.addEventListener('resize', this.handleResize);
+	}
+	componentWillUnmount() {
+		window.removeEventListener('resize', this.handleResize);
 	}
 
 	componentDidUpdate(prevProps, prevState) {
@@ -49,7 +64,7 @@ class GameEnvironment extends React.Component {
 	render() {
 		return (
 			<Canvas layoutStyles={layoutStyles} canvasRef={this.canvasRef}>
-				<PlayerOne enemyDimensions={this.state.enemyDimensions} canvasRef={this.canvasRef} />
+				<PlayerOneController enemyDimensions={this.state.enemyDimensions} canvasRef={this.canvasRef} />
 				<LevelOne
 					enemies={this.state.enemies}
 					getDimensions={this.getDimensions}
@@ -68,6 +83,8 @@ const mapStateToProps = state => {
 		enemyCoords: state.enemy.enemyCoords,
 		enemyHit: state.enemy.enemyHit,
 		enemyAmount: state.enemy.enemyAmount,
+		gameArea: state.gameArea,
+		windowDimensions: state.windowDimensions,
 	};
 };
-export default connect(mapStateToProps, { getEnemyCoordinates, setEnemyAmount })(GameEnvironment);
+export default connect(mapStateToProps, { getEnemyCoordinates, setEnemyAmount, getWindowSize })(GameEnvironment);

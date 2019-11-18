@@ -1,3 +1,10 @@
+export const setPlayerCharacter = player => async dispatch => {
+	dispatch({
+		type: 'PLAYER_CHARACTER',
+		payload: await player,
+	});
+};
+
 export const getPlayerDimensions = dimensions => async dispatch => {
 	dispatch({
 		type: 'PLAYER_DIMENSIONS',

@@ -1,6 +1,7 @@
-import { PLAYER_DIMENSIONS, LAZER_COORDINATES } from '../actions/types';
+import { PLAYER_DIMENSIONS, PLAYER_CHARACTER, LAZER_COORDINATES } from '../actions/types';
 
 const initialState = {
+	playerCharacter: {},
 	playerDimensions: {},
 	lazerCoords: {},
 };
@@ -9,6 +10,11 @@ export default (state = initialState, action) => {
 	const { type, payload } = action;
 
 	switch (type) {
+		case PLAYER_CHARACTER:
+			return {
+				...state,
+				playerCharacter: payload,
+			};
 		case PLAYER_DIMENSIONS:
 			return {
 				...state,

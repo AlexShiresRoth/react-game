@@ -5,7 +5,6 @@ const Lazer = ({ lazerPosition, lazer, lazerRef, getLazerCoords }) => {
 	useEffect(() => {
 		if (lazerRef.current) {
 			let coords = lazerRef.current.getBoundingClientRect();
-
 			getLazerCoords(coords);
 		}
 	}, []);
